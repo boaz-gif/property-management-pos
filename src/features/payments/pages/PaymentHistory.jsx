@@ -6,6 +6,7 @@ import GlassCard from '../../../components/ui/GlassCard';
 import PageHeader from '../../../components/ui/PageHeader';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import { formatKES } from '../../../utils/currency';
+import VirtualTable from '../../../components/ui/VirtualTable';
 
 const PaymentHistory = () => {
     const [payments, setPayments] = useState([]);
@@ -67,64 +68,66 @@ const PaymentHistory = () => {
             </div>
 
             {loading ? <LoadingSpinner /> : (
-                <GlassCard p={false} className="overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-sm border-b border-gray-200 dark:border-gray-700">
-                                    <th className="p-4 font-medium">Date</th>
-                                    <th className="p-4 font-medium">Description</th>
-                                    <th className="p-4 font-medium">Amount</th>
-                                    <th className="p-4 font-medium">Status</th>
-                                    <th className="p-4 font-medium text-right">Receipt</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {payments.length > 0 ? payments.map((payment) => (
-                                    <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td className="p-4 text-gray-700 dark:text-gray-300">
-                                            {new Date(payment.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="p-4 text-gray-600 dark:text-gray-400">
-                                            {payment.type === 'rent' ? 'Rent Payment' : payment.type}
-                                            <div className="text-xs text-gray-500 capitalize">{payment.method}</div>
-                                        </td>
-                                        <td className="p-4 font-medium text-gray-900 dark:text-white">
-                                            {formatKES(parseFloat(payment.amount))}
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                payment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                                payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                            }`}>
-                                                {payment.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            {payment.pdf_url && (
-                                                <button 
-                                                    onClick={() => handleDownloadReceipt(payment.pdf_url)}
-                                                    className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-                                                    title="Download Receipt"
-                                                >
-                                                    <Download className="h-5 w-5" />
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="5" className="p-8 text-center text-gray-500 dark:text-gray-400">
-                                            No payment history found
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </GlassCard>
+                <VirtualTable
+                    items={payments}
+                    height={600}
+                    itemSize={70}
+                    emptyState={<div className="p-8 text-center text-gray-500">No payment history found</div>}
+                    columns={[
+                        {
+                            header: 'Date',
+                            render: (p) => new Date(p.date).toLocaleDateString(),
+                            width: '20%'
+                        },
+                        {
+                            header: 'Description',
+                            render: (p) => (
+                                <div>
+                                    {p.type === 'rent' ? 'Rent Payment' : p.type}
+                                    <div className="text-xs text-gray-500 capitalize">{p.method}</div>
+                                </div>
+                            ),
+                            width: '30%'
+                        },
+                        {
+                            header: 'Amount',
+                            render: (p) => (
+                                <span className="font-medium text-gray-900 dark:text-white">
+                                    {formatKES(parseFloat(p.amount))}
+                                </span>
+                            ),
+                            width: '20%'
+                        },
+                        {
+                            header: 'Status',
+                            render: (p) => (
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                    p.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                    p.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                    {p.status}
+                                </span>
+                            ),
+                            width: '15%'
+                        },
+                        {
+                            header: 'Receipt',
+                            render: (p) => p.pdf_url && (
+                                <button 
+                                    onClick={() => handleDownloadReceipt(p.pdf_url)}
+                                    className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                                    title="Download Receipt"
+                                >
+                                    <Download className="h-5 w-5" />
+                                </button>
+                            ),
+                            width: '15%'
+                        }
+                    ]}
+                />
             )}
+
         </div>
     );
 };

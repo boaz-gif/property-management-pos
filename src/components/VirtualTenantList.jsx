@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { useInfiniteTenants } from '../hooks/useQueries';
 import { MoreHorizontal, Mail, Phone, Home, Calendar } from 'lucide-react';

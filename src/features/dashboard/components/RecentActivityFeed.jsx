@@ -1,5 +1,5 @@
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const RecentActivityFeed = ({ activities = [] }) => {
   return (
@@ -34,4 +34,4 @@ const RecentActivityFeed = ({ activities = [] }) => {
   );
 };
 
-export default RecentActivityFeed;
+export default React.memo(RecentActivityFeed);

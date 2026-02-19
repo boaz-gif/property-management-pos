@@ -1,7 +1,7 @@
 
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
-import { formatKES } from '../../utils/currency';
+import GlassCard from '../../../components/ui/GlassCard';
+import { formatKES } from '../../../utils/currency';
 
 const PaymentBreakdown = ({ breakdown }) => {
   if (!breakdown) return null;

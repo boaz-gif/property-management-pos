@@ -1,5 +1,5 @@
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const RevenueTrendChart = ({ data = [] }) => {
   const maxValue = Math.max(...data.map((item) => item.value || 0), 0);

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import GlassCard from '../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const AutoPayConfig = ({ config, paymentMethods, onSave, onDisable }) => {
   const [enabled, setEnabled] = useState(false);

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../features/auth/context/AuthContext';
 import {
   selectUser,
   selectToken,

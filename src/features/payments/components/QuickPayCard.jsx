@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GlassCard from '../ui/GlassCard';
-import { formatKES } from '../../utils/currency';
+import GlassCard from '../../../components/ui/GlassCard';
+import { formatKES } from '../../../utils/currency';
 
 const QuickPayCard = ({ balance, rentAmount, nextDueDate, defaultPaymentMethod, onPayNow }) => {
   const navigate = useNavigate();

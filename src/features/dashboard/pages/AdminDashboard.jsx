@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { dashboardWidgetAPI } from '../../services/api';
-import GlassCard from '../../components/ui/GlassCard';
-import GlassButton from '../../components/ui/GlassButton';
-import PageHeader from '../../components/ui/PageHeader';
+import api, { dashboardWidgetAPI } from '../../../services/api';
+import GlassCard from '../../../components/ui/GlassCard';
+import GlassButton from '../../../components/ui/GlassButton';
+import PageHeader from '../../../components/ui/PageHeader';
 import PortfolioKPICards from '../components/PortfolioKPICards';
 import ActionItemsList from '../components/ActionItemsList';
 import QuickActionsMenu from '../components/QuickActionsMenu';
@@ -100,15 +100,7 @@ const AdminDashboard = () => {
         fetchDashboardData();
     }, []);
 
-    if (loading) {
-        return <div className="text-white text-center p-8">Loading dashboard...</div>;
-    }
-
-    if (error) {
-        return <div className="text-red-400 text-center p-8">{error}</div>;
-    }
-
-    const handleQuickAction = (action) => {
+    const handleQuickAction = useCallback((action) => {
         const actionRoutes = {
             register_tenant: '/admin/register-tenant',
             record_payment: '/admin/payments',
@@ -120,9 +112,9 @@ const AdminDashboard = () => {
         if (route) {
             navigate(route);
         }
-    };
+    }, [navigate]);
 
-    const moveWidget = (id, direction) => {
+    const moveWidget = useCallback((id, direction) => {
         setDraftWidgets(prev => {
             const idx = prev.findIndex(w => w.id === id);
             if (idx === -1) return prev;
@@ -134,13 +126,13 @@ const AdminDashboard = () => {
             copy[nextIdx] = tmp;
             return copy;
         });
-    };
+    }, []);
 
-    const toggleWidgetVisibility = (id) => {
+    const toggleWidgetVisibility = useCallback((id) => {
         setDraftWidgets(prev => prev.map(w => (w.id === id ? { ...w, visible: !w.visible } : w)));
-    };
+    }, []);
 
-    const saveWidgetLayout = async () => {
+    const saveWidgetLayout = useCallback(async () => {
         const payload = draftWidgets.map((w, index) => ({
             id: w.id,
             position: index,
@@ -149,9 +141,19 @@ const AdminDashboard = () => {
         await dashboardWidgetAPI.updateOrder(payload);
         setWidgets(draftWidgets);
         setEditMode(false);
-    };
+    }, [draftWidgets]);
 
-    const activeWidgets = (editMode ? draftWidgets : widgets).filter(w => w.visible);
+    const activeWidgets = useMemo(() => 
+        (editMode ? draftWidgets : widgets).filter(w => w.visible),
+    [editMode, draftWidgets, widgets]);
+
+    if (loading) {
+        return <div className="text-white text-center p-8">Loading dashboard...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-400 text-center p-8">{error}</div>;
+    }
 
     const renderWidget = (type) => {
         switch (type) {

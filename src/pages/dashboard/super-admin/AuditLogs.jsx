@@ -5,6 +5,7 @@ import {
   Calendar, ArrowUpDown
 } from 'lucide-react';
 import api from '../../../services/api';
+import VirtualTable from '../../../components/ui/VirtualTable';
 
 /**
  * Super Admin Audit Logs Viewer
@@ -86,9 +87,13 @@ function AuditLogs() {
 
   /**
    * Load logs on component mount and when filters/pagination change
+   * Added debouncing for filter updates
    */
   useEffect(() => {
-    fetchAuditLogs();
+    const timer = setTimeout(() => {
+      fetchAuditLogs();
+    }, 400);
+    return () => clearTimeout(timer);
   }, [page, limit, filters]);
 
   /**
@@ -346,176 +351,98 @@ function AuditLogs() {
 
       {/* Logs Table */}
       {!loading && logs.length > 0 && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Action
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Resource
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Date & Time
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Details
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {logs.map(log => (
-                <React.Fragment key={log.id}>
-                  <tr className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActionColor(log.action)}`}>
-                        {log.action}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <Package size={16} className="text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            {log.resourceType}
-                          </p>
-                          {log.resourceId && (
-                            <p className="text-xs text-gray-500">
-                              ID: {log.resourceId}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <User size={16} className="text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            {log.userEmail || `User #${log.userId}`}
-                          </p>
-                          {log.userRole && (
-                            <p className="text-xs text-gray-500 capitalize">
-                              {log.userRole}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}>
-                        {log.status === 'success' ? (
-                          <CheckCircle size={14} className="mr-1" />
-                        ) : (
-                          <AlertCircle size={14} className="mr-1" />
-                        )}
-                        {log.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock size={16} />
-                        {new Date(log.createdAt).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => toggleRowExpansion(log.id)}
-                        className="text-blue-600 hover:text-blue-800 transition inline-flex items-center gap-1"
-                      >
-                        {expandedRows.has(log.id) ? (
-                          <>
-                            <ChevronUp size={16} />
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown size={16} />
-                          </>
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* Expanded Details Row */}
-                  {expandedRows.has(log.id) && (
-                    <tr className="bg-gray-50">
-                      <td colSpan="6" className="px-6 py-4">
-                        <div className="space-y-4">
-                          {/* User Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white border border-gray-200 rounded p-3">
-                            <div>
-                              <p className="text-xs font-medium text-gray-700 uppercase">User ID</p>
-                              <p className="text-sm text-gray-900">{log.userId || 'N/A (Deleted User)'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-gray-700 uppercase">User Email</p>
-                              <p className="text-sm text-gray-900 font-mono">{log.userEmail || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-gray-700 uppercase">User Role</p>
-                              <p className="text-sm text-gray-900 capitalize font-semibold">
-                                {log.userRole || 'N/A'}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Metadata */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <p className="text-xs font-medium text-gray-700 uppercase">IP Address</p>
-                              <p className="text-sm text-gray-900 font-mono">{log.ipAddress || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-gray-700 uppercase">User Agent</p>
-                              <p className="text-sm text-gray-900 font-mono truncate" title={log.userAgent}>
-                                {log.userAgent ? log.userAgent.substring(0, 50) + '...' : 'N/A'}
-                              </p>
-                            </div>
-                            {log.errorMessage && (
-                              <div>
-                                <p className="text-xs font-medium text-gray-700 uppercase">Error</p>
-                                <p className="text-sm text-red-600">{log.errorMessage}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Old/New Values */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {log.oldValues && (
-                              <div>
-                                <p className="text-xs font-medium text-gray-700 uppercase mb-2">Before</p>
-                                <pre className="bg-white border border-gray-200 rounded p-3 text-xs overflow-x-auto max-h-64">
-                                  {JSON.stringify(log.oldValues, null, 2)}
-                                </pre>
-                              </div>
-                            )}
-
-                            {log.newValues && (
-                              <div>
-                                <p className="text-xs font-medium text-gray-700 uppercase mb-2">After</p>
-                                <pre className="bg-white border border-gray-200 rounded p-3 text-xs overflow-x-auto max-h-64">
-                                  {JSON.stringify(log.newValues, null, 2)}
-                                </pre>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+        <VirtualTable
+          items={logs}
+          height={600}
+          itemSize={70}
+          columns={[
+            {
+              header: 'Action',
+              render: (log) => (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActionColor(log.action)}`}>
+                  {log.action}
+                </span>
+              ),
+              width: '10%'
+            },
+            {
+              header: 'Resource',
+              render: (log) => (
+                <div className="flex items-center gap-2">
+                  <Package size={16} className="text-gray-400" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {log.resourceType}
+                    </p>
+                    {log.resourceId && (
+                      <p className="text-xs text-gray-500 truncate">
+                        ID: {log.resourceId}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ),
+              width: '20%'
+            },
+            {
+              header: 'User',
+              render: (log) => (
+                <div className="flex items-center gap-2">
+                  <User size={16} className="text-gray-400" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {log.userEmail || `User #${log.userId}`}
+                    </p>
+                    {log.userRole && (
+                      <p className="text-xs text-gray-500 capitalize">
+                        {log.userRole}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ),
+              width: '25%'
+            },
+            {
+              header: 'Status',
+              render: (log) => (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}>
+                  {log.status === 'success' ? (
+                    <CheckCircle size={14} className="mr-1" />
+                  ) : (
+                    <AlertCircle size={14} className="mr-1" />
                   )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  {log.status}
+                </span>
+              ),
+              width: '15%'
+            },
+            {
+              header: 'Date & Time',
+              render: (log) => (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock size={16} />
+                  {new Date(log.createdAt).toLocaleString()}
+                </div>
+              ),
+              width: '20%'
+            },
+            {
+              header: 'Details',
+              render: (log) => (
+                <button
+                  onClick={() => showLogDetails(log)}
+                  className="text-blue-600 hover:text-blue-800 transition text-sm font-medium"
+                >
+                  View JSON
+                </button>
+              ),
+              width: '10%'
+            }
+          ]}
+        />
       )}
+
 
       {/* Empty State */}
       {!loading && logs.length === 0 && !error && (

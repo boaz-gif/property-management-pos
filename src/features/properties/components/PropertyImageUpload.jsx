@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
-import GlassCard from '../../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const PropertyImageUpload = ({ images = [], onUpload, onRemove, maxImages = 5 }) => {
     const [isDragging, setIsDragging] = useState(false);

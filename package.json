@@ -31,6 +31,7 @@
     "test:coverage": "react-scripts test --watchAll=false --coverage",
     "test:coverage-gate": "react-scripts test --watchAll=false --coverage && node scripts/coverage-gate.js --coverage-dir coverage",
     "baseline": "node scripts/baseline-capture.js",
+    "audit:bundle": "node scripts/bundle-audit.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -1,6 +1,6 @@
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
-import GlassButton from '../ui/GlassButton';
+import GlassCard from '../../../components/ui/GlassCard';
+import GlassButton from '../../../components/ui/GlassButton';
 
 const QuickActionsMenu = ({ onAction }) => {
   const actions = [

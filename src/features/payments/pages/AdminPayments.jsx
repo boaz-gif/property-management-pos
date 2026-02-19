@@ -4,6 +4,7 @@ import api from '../../../services/apiClient';
 import GlassCard from '../../../components/ui/GlassCard';
 import GlassButton from '../../../components/ui/GlassButton';
 import PageHeader from '../../../components/ui/PageHeader';
+import VirtualTable from '../../../components/ui/VirtualTable';
 
 const AdminPayments = () => {
     const [payments, setPayments] = useState([]);
@@ -121,42 +122,62 @@ const AdminPayments = () => {
                 </GlassCard>
             </div>
 
-            <GlassCard p={false} className="overflow-hidden">
-                <div className="p-6 border-b border-white/10">
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold">All Payments</h3>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="text-left">
-                            <tr className="border-b border-white/10 text-gray-400">
-                                <th className="p-4 font-medium">Tenant</th>
-                                <th className="p-4 font-medium">Date</th>
-                                <th className="p-4 font-medium">Amount</th>
-                                <th className="p-4 font-medium">Method</th>
-                                <th className="p-4 font-medium">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {payments.map((payment) => (
-                                <tr key={payment.id} className="text-white hover:bg-white/5 transition-colors">
-                                    <td className="p-4">{payment.tenant_name || 'Unknown Tenant'}</td>
-                                    <td className="p-4 flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-400" />
-                                        {payment.date}
-                                    </td>
-                                    <td className="p-4 font-medium text-blue-400">${parseFloat(payment.amount).toFixed(2)}</td>
-                                    <td className="p-4 text-gray-300 capitalize">{payment.method.replace('_', ' ')}</td>
-                                    <td className="p-4">
-                                        <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-semibold border border-green-500/20">
-                                            {payment.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </GlassCard>
+                
+                <VirtualTable
+                    items={payments}
+                    height={600}
+                    itemSize={70}
+                    columns={[
+                        {
+                            header: 'Tenant',
+                            render: (p) => p.tenant_name || 'Unknown Tenant',
+                            width: '25%'
+                        },
+                        {
+                            header: 'Date',
+                            render: (p) => (
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-gray-400" />
+                                    {p.date}
+                                </div>
+                            ),
+                            width: '20%'
+                        },
+                        {
+                            header: 'Amount',
+                            render: (p) => (
+                                <span className="font-medium text-blue-400">
+                                    ${parseFloat(p.amount).toFixed(2)}
+                                </span>
+                            ),
+                            width: '15%'
+                        },
+                        {
+                            header: 'Method',
+                            render: (p) => (
+                                <span className="text-gray-300 capitalize">
+                                    {p.method.replace('_', ' ')}
+                                </span>
+                            ),
+                            width: '20%'
+                        },
+                        {
+                            header: 'Status',
+                            render: (p) => (
+                                <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-semibold border border-green-500/20">
+                                    {p.status}
+                                </span>
+                            ),
+                            width: '20%'
+                        }
+                    ]}
+                />
+            </div>
+
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../features/auth/context/AuthContext';
 import { 
     LayoutDashboard, 
     CreditCard, 
@@ -14,6 +14,7 @@ import {
     FileText,
     MessageSquare
 } from 'lucide-react';
+import { PrefetchMap, prefetchComponent } from '../utils/prefetch';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -59,6 +60,26 @@ const Sidebar = () => {
         }
     };
 
+    const prefetchItem = (path) => {
+        const map = {
+            '/super-admin': PrefetchMap.ADMIN_DASHBOARD,
+            '/admin': PrefetchMap.ADMIN_DASHBOARD,
+            '/tenant': PrefetchMap.TENANT_DASHBOARD,
+            '/messages': PrefetchMap.MESSAGES,
+            '/admin/properties': PrefetchMap.ADMIN_PROPERTIES,
+            '/admin/payments': PrefetchMap.ADMIN_PAYMENTS,
+            '/admin/leases': PrefetchMap.ADMIN_LEASES,
+            '/admin/documents': PrefetchMap.TENANT_DOCUMENTS,
+            '/tenant/payments': PrefetchMap.TENANT_PAYMENTS,
+            '/tenant/maintenance': PrefetchMap.TENANT_MAINTENANCE,
+            '/tenant/documents': PrefetchMap.TENANT_DOCUMENTS,
+        };
+        
+        if (map[path]) {
+            prefetchComponent(map[path]);
+        }
+    };
+
     const navItems = getNavItems();
 
     return (
@@ -77,6 +98,7 @@ const Sidebar = () => {
                     <Link
                         key={item.path}
                         to={item.path}
+                        onMouseEnter={() => prefetchItem(item.path)}
                         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                             isActive(item.path)
                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'

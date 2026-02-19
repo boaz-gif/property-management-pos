@@ -1,7 +1,7 @@
 import React from 'react';
 import { Building, Users, TrendingUp, DollarSign, Wrench, Calendar } from 'lucide-react';
-import GlassCard from '../ui/GlassCard';
-import { formatKES } from '../../utils/currency';
+import GlassCard from '../../../components/ui/GlassCard';
+import { formatKES } from '../../../utils/currency';
 
 const formatCurrency = (value) => {
   return formatKES(value, { maximumFractionDigits: 0 });

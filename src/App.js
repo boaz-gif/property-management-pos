@@ -55,212 +55,88 @@ function App() {
           <SocketProvider>
             <NotificationProvider>
               <Router>
-              <Routes>
-                {/* ========== PUBLIC ROUTES ========== */}
-                <Route path="/login" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Login />
-                  </Suspense>
-                } />
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    {/* ========== PUBLIC ROUTES ========== */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<Navigate to="/login" replace />} />
 
-                {/* ========== ERROR PAGES ========== */}
-                <Route path="/unauthorized" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Unauthorized />
-                  </Suspense>
-                } />
-                <Route path="/forbidden" element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Forbidden />
-                  </Suspense>
-                } />
+                    {/* ========== ERROR PAGES ========== */}
+                    <Route path="/unauthorized" element={<Unauthorized />} />
+                    <Route path="/forbidden" element={<Forbidden />} />
 
-                {/* ========== SUPER ADMIN ROUTES ========== */}
-                <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
-                  <Route element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PerfProfiler id="super-admin-layout">
-                        <DashboardLayout />
-                      </PerfProfiler>
-                    </Suspense>
-                  }>
-                    <Route path="/super-admin" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <SuperAdminDashboard />
-                      </Suspense>
-                    } />
-                    <Route path="/super-admin/users" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <UserManagement />
-                      </Suspense>
-                    } />
-                    <Route path="/super-admin/admins" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminManagement />
-                      </Suspense>
-                    } />
-                    <Route path="/super-admin/audit" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AuditLogs />
-                      </Suspense>
-                    } />
-                    <Route path="/super-admin/register-admin" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <RegisterAdmin />
-                      </Suspense>
-                    } />
-                  </Route>
-                </Route>
+                    {/* ========== SUPER ADMIN ROUTES ========== */}
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+                      <Route element={
+                        <PerfProfiler id="super-admin-layout">
+                          <DashboardLayout />
+                        </PerfProfiler>
+                      }>
+                        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+                        <Route path="/super-admin/users" element={<UserManagement />} />
+                        <Route path="/super-admin/admins" element={<AdminManagement />} />
+                        <Route path="/super-admin/audit" element={<AuditLogs />} />
+                        <Route path="/super-admin/register-admin" element={<RegisterAdmin />} />
+                      </Route>
+                    </Route>
 
-                {/* ========== ADMIN ROUTES ========== */}
-                <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin']} />}>
-                  <Route element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PerfProfiler id="admin-layout">
-                        <DashboardLayout />
-                      </PerfProfiler>
-                    </Suspense>
-                  }>
-                    <Route path="/admin" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminDashboard />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/properties" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminProperties />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/properties/new" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminPropertyDetail />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/properties/:propertyId" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminPropertyDetail />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/leases" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminLeaseManagement />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/payments" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminPayments />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/documents" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Documents />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/register-admin" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <RegisterAdmin />
-                      </Suspense>
-                    } />
-                    <Route path="/admin/register-tenant" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <RegisterTenant />
-                      </Suspense>
-                    } />
-                  </Route>
-                </Route>
+                    {/* ========== ADMIN ROUTES ========== */}
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin']} />}>
+                      <Route element={
+                        <PerfProfiler id="admin-layout">
+                          <DashboardLayout />
+                        </PerfProfiler>
+                      }>
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/admin/properties" element={<AdminProperties />} />
+                        <Route path="/admin/properties/new" element={<AdminPropertyDetail />} />
+                        <Route path="/admin/properties/:propertyId" element={<AdminPropertyDetail />} />
+                        <Route path="/admin/leases" element={<AdminLeaseManagement />} />
+                        <Route path="/admin/payments" element={<AdminPayments />} />
+                        <Route path="/admin/documents" element={<Documents />} />
+                        <Route path="/admin/register-admin" element={<RegisterAdmin />} />
+                        <Route path="/admin/register-tenant" element={<RegisterTenant />} />
+                      </Route>
+                    </Route>
 
-                {/* ========== TENANT ROUTES ========== */}
-                <Route element={<ProtectedRoute allowedRoles={['tenant']} />}>
-                  <Route element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PerfProfiler id="tenant-layout">
-                        <DashboardLayout />
-                      </PerfProfiler>
-                    </Suspense>
-                  }>
-                    <Route path="/tenant" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <TenantDashboard />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/payments" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <PaymentHistory />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/payments/pay" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <PayRent />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/payment-methods" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <PaymentMethods />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/payments/autopay" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AutoPaySetup />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/financials" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <BalanceStatement />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/maintenance" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Maintenance />
-                      </Suspense>
-                    } />
-                    <Route path="/tenant/documents" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Documents />
-                      </Suspense>
-                    } />
-                    {/* Keep old routes for backward compatibility (will redirect) */}
-                    <Route path="/dashboard" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <TenantDashboard />
-                      </Suspense>
-                    } />
-                    <Route path="/dashboard/payments" element={
-                      <Navigate to="/tenant/payments/pay" replace />
-                    } />
-                    <Route path="/dashboard/maintenance" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Maintenance />
-                      </Suspense>
-                    } />
-                  </Route>
-                </Route>
+                    {/* ========== TENANT ROUTES ========== */}
+                    <Route element={<ProtectedRoute allowedRoles={['tenant']} />}>
+                      <Route element={
+                        <PerfProfiler id="tenant-layout">
+                          <DashboardLayout />
+                        </PerfProfiler>
+                      }>
+                        <Route path="/tenant" element={<TenantDashboard />} />
+                        <Route path="/tenant/payments" element={<PaymentHistory />} />
+                        <Route path="/tenant/payments/pay" element={<PayRent />} />
+                        <Route path="/tenant/payment-methods" element={<PaymentMethods />} />
+                        <Route path="/tenant/payments/autopay" element={<AutoPaySetup />} />
+                        <Route path="/tenant/financials" element={<BalanceStatement />} />
+                        <Route path="/tenant/maintenance" element={<Maintenance />} />
+                        <Route path="/tenant/documents" element={<Documents />} />
+                        {/* Keep old routes for backward compatibility (will redirect) */}
+                        <Route path="/dashboard" element={<TenantDashboard />} />
+                        <Route path="/dashboard/payments" element={<Navigate to="/tenant/payments/pay" replace />} />
+                        <Route path="/dashboard/maintenance" element={<Maintenance />} />
+                      </Route>
+                    </Route>
 
-                <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'property_manager', 'tenant', 'maintenance_staff', 'accountant']} />}>
-                  <Route element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PerfProfiler id="shared-layout">
-                        <DashboardLayout />
-                      </PerfProfiler>
-                    </Suspense>
-                  }>
-                    <Route path="/messages" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <CommunicationHub />
-                      </Suspense>
-                    } />
-                    <Route path="/messages/:conversationId" element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <CommunicationHub />
-                      </Suspense>
-                    } />
-                  </Route>
-                </Route>
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'property_manager', 'tenant', 'maintenance_staff', 'accountant']} />}>
+                      <Route element={
+                        <PerfProfiler id="shared-layout">
+                          <DashboardLayout />
+                        </PerfProfiler>
+                      }>
+                        <Route path="/messages" element={<CommunicationHub />} />
+                        <Route path="/messages/:conversationId" element={<CommunicationHub />} />
+                      </Route>
+                    </Route>
 
-                {/* ========== CATCH ALL ========== */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
-            </Router>
+                    {/* ========== CATCH ALL ========== */}
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                  </Routes>
+                </Suspense>
+              </Router>
             </NotificationProvider>
           </SocketProvider>
         </AuthProvider>

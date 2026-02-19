@@ -20,10 +20,19 @@ import { useProperties, usePropertyStats } from '../hooks/usePropertyQueries';
 const AdminProperties = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [filter, setFilter] = useState('all'); // all, occupied, vacant, maintenance
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const [filter, setFilter] = useState('all'); 
     
+    // Debounce search query
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const { data: properties, isLoading, error } = useProperties({ 
-        q: searchQuery,
+        q: debouncedQuery,
         status: filter !== 'all' ? filter : undefined
     });
     

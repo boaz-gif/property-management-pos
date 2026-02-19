@@ -1,7 +1,7 @@
 import React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Home, MapPin, ArrowRight } from 'lucide-react';
-import GlassCard from '../../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const VirtualPropertyList = ({ properties = [], onItemClick }) => {
     const parentRef = React.useRef();

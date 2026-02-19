@@ -1,6 +1,6 @@
 
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const PaymentMethodCard = ({ method, onSetDefault, onDelete }) => {
   return (

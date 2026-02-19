@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import api from '../../../services/api';
 import { authAPI } from '../../../services/api';
+import VirtualTable from '../../../components/ui/VirtualTable';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -38,7 +39,10 @@ const UserManagement = () => {
   }, [showArchived]);
 
   useEffect(() => {
-    filterUsers();
+    const timer = setTimeout(() => {
+      filterUsers();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [users, searchTerm, roleFilter]);
 
   const fetchCurrentUser = async () => {
@@ -300,135 +304,111 @@ const UserManagement = () => {
       </div>
 
       {/* User List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  Joined
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                  >
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user.name || 'N/A'}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {user.email}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(
-                          user.role
-                        )}`}
-                      >
-                        {user.role === 'super_admin'
-                          ? 'Super Admin'
-                          : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
+      <VirtualTable
+        items={filteredUsers}
+        height={600}
+        itemSize={80}
+        columns={[
+          {
+            header: 'User',
+            render: (user) => (
+              <p className="font-medium text-gray-900 dark:text-white">
+                {user.name || 'N/A'}
+              </p>
+            ),
+            width: '20%'
+          },
+          {
+            header: 'Email',
+            render: (user) => (
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span className="text-gray-600 dark:text-gray-400 truncate">
+                  {user.email}
+                </span>
+              </div>
+            ),
+            width: '25%'
+          },
+          {
+            header: 'Role',
+            render: (user) => (
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(user.role)}`}>
+                {user.role === 'super_admin' ? 'Super Admin' : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
+            ),
+            width: '15%'
+          },
+          {
+            header: 'Status',
+            render: (user) => (
+              <button
+                onClick={() => handleStatusToggle(user.id, user.status || 'active')}
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  (user.status || 'active') === 'active'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                }`}
+              >
+                {(user.status || 'active').charAt(0).toUpperCase() + (user.status || 'active').slice(1)}
+              </button>
+            ),
+            width: '10%'
+          },
+          {
+            header: 'Joined',
+            render: (user) => (
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <Calendar className="w-4 h-4" />
+                {formatDate(user.created_at || new Date())}
+              </div>
+            ),
+            width: '15%'
+          },
+          {
+            header: 'Actions',
+            render: (user) => (
+              <div className="flex items-center gap-2">
+                {!showArchived ? (
+                  <>
+                    <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition" title="Edit">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleArchiveUser(user.id)}
+                      className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition"
+                      title="Archive"
+                    >
+                      <Archive className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleRestoreUser(user.id)}
+                      className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition"
+                      title="Restore"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                    {currentUser?.role === 'super_admin' && (
                       <button
-                        onClick={() => handleStatusToggle(user.id, user.status || 'active')}
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          (user.status || 'active') === 'active'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                        }`}
+                        onClick={() => handlePermanentDelete(user.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                        title="Permanent Delete"
                       >
-                        {(user.status || 'active').charAt(0).toUpperCase() +
-                          (user.status || 'active').slice(1)}
+                        <XCircle className="w-4 h-4" />
                       </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(user.created_at || new Date())}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {!showArchived ? (
-                          <>
-                            <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition" title="Edit">
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleArchiveUser(user.id)}
-                              className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition"
-                              title="Archive"
-                            >
-                              <Archive className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleRestoreUser(user.id)}
-                              className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition"
-                              title="Restore"
-                            >
-                              <RotateCcw className="w-4 h-4" />
-                            </button>
-                            {currentUser?.role === 'super_admin' && (
-                              <button
-                                onClick={() => handlePermanentDelete(user.id)}
-                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
-                                title="Permanent Delete"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center">
-                    <p className="text-gray-500 dark:text-gray-400">
-                      {searchTerm || roleFilter !== 'all'
-                        ? 'No users found matching your filters'
-                        : 'No users found'}
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ),
+            width: '15%'
+          }
+        ]}
+      />
+
 
       {/* Summary */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

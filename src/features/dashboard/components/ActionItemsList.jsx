@@ -1,6 +1,6 @@
 import React from 'react';
-import GlassCard from '../ui/GlassCard';
-import GlassButton from '../ui/GlassButton';
+import GlassCard from '../../../components/ui/GlassCard';
+import GlassButton from '../../../components/ui/GlassButton';
 
 const priorityStyles = {
   critical: 'border-red-500/60 bg-red-500/10',
@@ -61,4 +61,4 @@ const ActionItemsList = ({ items = [], onViewAll }) => {
   );
 };
 
-export default ActionItemsList;
+export default React.memo(ActionItemsList);
