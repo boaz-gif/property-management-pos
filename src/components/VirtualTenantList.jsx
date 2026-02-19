@@ -1,26 +1,13 @@
-import React, { memo, useCallback } from 'react';
-import { List } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
+import React, { memo, useEffect, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useInfiniteTenants } from '../hooks/useQueries';
 import { MoreHorizontal, Mail, Phone, Home, Calendar } from 'lucide-react';
 
 // Row component for virtual list
-const TenantRow = memo(({ index, style, data }) => {
-  const { tenants, onTenantClick, userRole } = data;
-  const tenant = tenants[index];
-
-  if (!tenant) {
-    return (
-      <div style={style} className="flex items-center justify-center p-4 border-b border-gray-700">
-        <MoreHorizontal className="h-4 w-4 text-gray-500 animate-spin" />
-      </div>
-    );
-  }
-
+const TenantRow = memo(({ tenant, onTenantClick }) => {
   return (
     <div 
-      style={style} 
-      className="border-b border-gray-700 hover:bg-gray-800 cursor-pointer transition-colors"
+      className="border-b border-gray-700 hover:bg-gray-800 cursor-pointer transition-colors w-full h-full"
       onClick={() => onTenantClick(tenant)}
     >
       <div className="p-4">
@@ -49,12 +36,6 @@ const TenantRow = memo(({ index, style, data }) => {
                       {tenant.phone}
                     </span>
                   )}
-                  {tenant.property_name && (
-                    <span className="flex items-center gap-1">
-                      <Home className="h-3 w-3" />
-                      {tenant.property_name}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
@@ -69,20 +50,8 @@ const TenantRow = memo(({ index, style, data }) => {
             }`}>
               {tenant.status}
             </span>
-            {tenant.rent && (
-              <span className="text-sm text-gray-300">
-                ${tenant.rent}/mo
-              </span>
-            )}
           </div>
         </div>
-        {tenant.lease_start_date && (
-          <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
-            <Calendar className="h-3 w-3" />
-            Lease: {new Date(tenant.lease_start_date).toLocaleDateString()} - 
-            {tenant.lease_end_date ? new Date(tenant.lease_end_date).toLocaleDateString() : 'Ongoing'}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -96,7 +65,7 @@ const VirtualTenantList = memo(({
   userRole = 'admin',
   searchParams = {},
   height = 600,
-  rowHeight = 120 
+  rowHeight = 100 
 }) => {
   const {
     data,
@@ -108,23 +77,37 @@ const VirtualTenantList = memo(({
     error
   } = useInfiniteTenants(searchParams);
 
+  const parentRef = useRef(null);
+
   // Flatten all pages into a single array
   const tenants = data?.pages?.flatMap(page => page.data) || [];
   
-  // Determine if there are more items to load
-  const isItemLoaded = useCallback(index => {
-    return !hasNextPage || index < tenants.length;
-  }, [hasNextPage, tenants.length]);
+  // Count of items (including loading indicator if needed)
+  const count = tenants.length;
 
-  // Load more items
-  const loadMoreItems = useCallback(() => {
-    if (!isFetchingNextPage && hasNextPage) {
+  const rowVirtualizer = useVirtualizer({
+    count,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => rowHeight,
+    overscan: 5,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  // Load more items when reaching the bottom
+  useEffect(() => {
+    const lastItem = virtualItems[virtualItems.length - 1];
+
+    if (!lastItem) return;
+
+    if (
+      lastItem.index >= tenants.length - 1 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
       fetchNextPage();
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  // Count of items (including loading indicator)
-  const itemCount = hasNextPage ? tenants.length + 1 : tenants.length;
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, tenants.length, virtualItems]);
 
   if (isLoading) {
     return (
@@ -136,58 +119,70 @@ const VirtualTenantList = memo(({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-red-400">
-        <p className="text-sm">Failed to load tenants</p>
-        <p className="text-xs mt-1">{error.message}</p>
+      <div className="flex flex-col items-center justify-center p-8 text-red-400">
+        <p className="text-sm font-semibold">Failed to load tenants</p>
+        <p className="text-xs mt-1 opacity-70">{error.message}</p>
       </div>
     );
   }
 
   if (tenants.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-        <Home className="h-12 w-12 mb-2" />
+      <div className="flex flex-col items-center justify-center p-12 text-gray-400">
+        <Home className="h-12 w-12 mb-3 opacity-20" />
         <p className="text-sm">No tenants found</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-900 rounded-lg border border-gray-700">
-      <div className="p-4 border-b border-gray-700">
+    <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="p-4 border-b border-gray-700 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
         <h2 className="text-lg font-semibold text-white">
           Tenants ({tenants.length}+)
         </h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Virtualized list for optimal performance
+        <p className="text-xs text-gray-500 mt-0.5">
+          Virtualized by @tanstack/react-virtual
         </p>
       </div>
       
-      <InfiniteLoader
-        isItemLoaded={isItemLoaded}
-        itemCount={itemCount}
-        loadMoreItems={loadMoreItems}
-        threshold={10}
+      <div 
+        ref={parentRef}
+        className="overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+        style={{ height: `${height}px` }}
       >
-        {({ onItemsRendered, ref }) => (
-          <List
-            ref={ref}
-            height={height}
-            itemCount={itemCount}
-            itemSize={rowHeight}
-            itemData={{ tenants, onTenantClick, userRole }}
-            onItemsRendered={onItemsRendered}
-            className="scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
-          >
-            {TenantRow}
-          </List>
-        )}
-      </InfiniteLoader>
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualItems.map((virtualRow) => (
+            <div
+              key={virtualRow.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              <TenantRow 
+                tenant={tenants[virtualRow.index]} 
+                onTenantClick={onTenantClick} 
+              />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {isFetchingNextPage && (
-        <div className="flex items-center justify-center p-4 border-t border-gray-700">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mr-2"></div>
-          <span className="text-sm text-gray-400">Loading more tenants...</span>
+        <div className="flex items-center justify-center p-3 border-t border-gray-700 bg-gray-800/30">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-3"></div>
+          <span className="text-xs text-gray-400 font-medium">Loading more tenants...</span>
         </div>
       )}
     </div>

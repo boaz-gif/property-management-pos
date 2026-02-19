@@ -1,6 +1,8 @@
-import React, { useEffect, useState, memo, useCallback } from 'react';
+import React, { useEffect, useState, memo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import api from '../../../services/apiClient';
 import { FileText, Download, Trash2, Calendar, File, RefreshCw } from 'lucide-react';
+import GlassCard from '../../../components/ui/GlassCard';
 
 const DocumentList = memo(({ 
   entityType, 
@@ -11,6 +13,7 @@ const DocumentList = memo(({
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const parentRef = useRef(null);
 
   const fetchDocuments = async () => {
     try {
@@ -34,6 +37,13 @@ const DocumentList = memo(({
     fetchDocuments();
   }, [entityType, entityId, refreshTrigger]);
 
+  const rowVirtualizer = useVirtualizer({
+    count: documents.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  });
+
   const handleDownload = async (doc) => {
     try {
       const response = await api.get(`/documents/${doc.id}/download`, {
@@ -43,7 +53,7 @@ const DocumentList = memo(({
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', doc.name); // Using original filename
+      link.setAttribute('download', doc.name);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -57,12 +67,7 @@ const DocumentList = memo(({
     if (!window.confirm('Are you sure you want to move this document to trash?')) return;
 
     try {
-      // Using DELETE method which maps to 'archive' or 'soft delete' in controller usually, 
-      // or we can call archive endpoint explicitly if preferred.
-      // Based on controller, DELETE /:id calls deleteDocument which does soft delete logic.
       await api.delete(`/documents/${id}`);
-      
-      // Remove from UI immediately
       setDocuments(prev => prev.filter(d => d.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
@@ -109,52 +114,71 @@ const DocumentList = memo(({
 
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
-      <table className="min-w-full divide-y divide-white/10">
-        <thead className="bg-white/5">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden sm:table-cell">Category</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden md:table-cell">Size</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden lg:table-cell">Date</th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/10">
-          {documents.map((doc) => (
-            <tr key={doc.id} className="hover:bg-white/5 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
+      {/* Header - Mimicking table header */}
+      <div className="bg-white/5 flex px-6 py-3 border-b border-white/10 text-xs font-medium text-gray-400 uppercase tracking-wider">
+        <div className="flex-1 min-w-0">Name</div>
+        <div className="w-32 hidden sm:block px-4">Category</div>
+        <div className="w-24 hidden md:block px-4">Size</div>
+        <div className="w-40 hidden lg:block px-4">Date</div>
+        <div className="w-32 text-right">Actions</div>
+      </div>
+
+      <div 
+        ref={parentRef}
+        className="overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+        style={{ height: '400px' }}
+      >
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const doc = documents[virtualRow.index];
+            return (
+              <div
+                key={virtualRow.key}
+                className="absolute top-0 left-0 w-full flex items-center px-6 border-b border-white/5 hover:bg-white/5 transition-colors"
+                style={{
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <div className="flex-1 min-w-0 flex items-center">
                   <FileText className="h-5 w-5 text-blue-400 mr-3 shrink-0" />
-                  <div>
-                    <div className="text-sm font-medium text-white max-w-[150px] sm:max-w-xs truncate" title={doc.name}>
+                  <div className="truncate">
+                    <div className="text-sm font-medium text-white truncate" title={doc.name}>
                       {doc.name}
                     </div>
                     {doc.description && (
-                      <div className="text-xs text-gray-500 truncate max-w-[150px]">{doc.description}</div>
+                      <div className="text-[10px] text-gray-500 truncate">{doc.description}</div>
                     )}
                   </div>
                 </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 capitalize">
-                  {doc.category || 'General'}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 hidden md:table-cell">
-                {formatSize(doc.file_size || doc.size)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 hidden lg:table-cell">
-                <div className="flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {formatDate(doc.created_at)}
+
+                <div className="w-32 hidden sm:block px-4">
+                  <span className="px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 capitalize">
+                    {doc.category || 'General'}
+                  </span>
                 </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex justify-end gap-2">
+
+                <div className="w-24 hidden md:block px-4 text-sm text-gray-400">
+                  {formatSize(doc.file_size || doc.size)}
+                </div>
+
+                <div className="w-40 hidden lg:block px-4 text-sm text-gray-400">
+                  <div className="flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {formatDate(doc.created_at)}
+                  </div>
+                </div>
+
+                <div className="w-32 flex justify-end gap-2">
                   <button 
                     onClick={() => handleDownload(doc)}
                     className="p-1 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-blue-400 transition-colors"
-                    title="Download"
                   >
                     <Download className="h-4 w-4" />
                   </button>
@@ -163,17 +187,16 @@ const DocumentList = memo(({
                     <button 
                       onClick={() => handleDelete(doc.id)}
                       className="p-1 px-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded text-red-400 transition-colors"
-                      title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 });
