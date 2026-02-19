@@ -1,4 +1,4 @@
-const adminManagementService = require('../services/adminManagementService');
+const adminManagementService = require('../services/auth/adminManagementService');
 const { validationResult } = require('express-validator');
 const { HTTP_STATUS } = require('../utils/constants');
 const auditMiddleware = require('../middleware/auditMiddleware');

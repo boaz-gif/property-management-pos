@@ -1,4 +1,4 @@
-const NotificationService = require('../services/notificationService');
+const NotificationService = require('../services/communications/notificationService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class NotificationController {

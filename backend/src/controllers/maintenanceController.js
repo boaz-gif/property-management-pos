@@ -1,5 +1,5 @@
-const MaintenanceService = require('../services/maintenanceService');
-const NotificationService = require('../services/notificationService');
+const MaintenanceService = require('../services/maintenance/maintenanceService');
+const NotificationService = require('../services/communications/notificationService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class MaintenanceController {

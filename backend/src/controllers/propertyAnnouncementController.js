@@ -1,4 +1,4 @@
-const PropertyAnnouncementService = require('../services/propertyAnnouncementService');
+const PropertyAnnouncementService = require('../services/properties/propertyAnnouncementService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class PropertyAnnouncementController {

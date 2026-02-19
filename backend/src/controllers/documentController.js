@@ -1,4 +1,4 @@
-const DocumentService = require('../services/documentService');
+const DocumentService = require('../services/tenants/documentService');
 const { HTTP_STATUS } = require('../utils/constants');
 const path = require('path');
 

@@ -4,7 +4,7 @@ const Database = require('../src/utils/database');
 
 jest.mock('../src/utils/database');
 
-const NotificationService = require('../src/services/notificationService');
+const NotificationService = require('../src/services/communications/notificationService');
 
 describe('Notification API Endpoints', () => {
   let userToken = 'mock_user_token';

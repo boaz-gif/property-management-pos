@@ -1,5 +1,5 @@
 const Database = require('./database');
-const ConversationService = require('../services/conversationService');
+const ConversationService = require('../services/communications/conversationService');
 
 class SocketIOConfig {
   static initialize(io) {

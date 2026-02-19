@@ -1,7 +1,7 @@
 const Database = require('../src/utils/database');
 
 jest.mock('../src/utils/database');
-jest.mock('../src/services/ReceiptService', () => ({
+jest.mock('../src/services/payments/ReceiptService', () => ({
   generateReceipt: jest.fn().mockResolvedValue({ filePath: 'uploads/receipts/unit.pdf' })
 }));
 
@@ -11,7 +11,7 @@ describe('TenantPaymentService.generateReceipt', () => {
   });
 
   test('enforces tenant boundary for non-system callers', async () => {
-    const TenantPaymentService = require('../src/services/tenantPaymentService');
+    const TenantPaymentService = require('../src/services/payments/tenantPaymentService');
 
     Database.query.mockImplementation((query, params) => {
       if (query.includes('SELECT * FROM payment_receipts')) {
@@ -36,7 +36,7 @@ describe('TenantPaymentService.generateReceipt', () => {
   });
 
   test('allows system caller without tenantId', async () => {
-    const TenantPaymentService = require('../src/services/tenantPaymentService');
+    const TenantPaymentService = require('../src/services/payments/tenantPaymentService');
 
     Database.query.mockImplementation((query, params) => {
       if (query.includes('SELECT * FROM payment_receipts')) {

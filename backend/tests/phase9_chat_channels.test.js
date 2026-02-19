@@ -5,13 +5,13 @@ const Database = require('../src/utils/database');
 let mockCurrentUserId = 7;
 
 jest.mock('../src/utils/database');
-jest.mock('../src/services/authService', () => ({
+jest.mock('../src/services/auth/authService', () => ({
   verifyToken: jest.fn(() => ({ id: mockCurrentUserId }))
 }));
-jest.mock('../src/services/tokenBlacklistService', () => ({
+jest.mock('../src/services/auth/tokenBlacklistService', () => ({
   isTokenBlacklisted: jest.fn().mockResolvedValue(false)
 }));
-jest.mock('../src/services/PermissionService', () => ({
+jest.mock('../src/services/auth/PermissionService', () => ({
   ensurePermission: jest.fn().mockResolvedValue(true),
   ensurePropertyAccess: jest.fn().mockResolvedValue(true),
   ensureTenantAccess: jest.fn().mockResolvedValue(true),

@@ -5,10 +5,10 @@ const fs = require('fs');
 const path = require('path');
 
 jest.mock('../src/utils/database');
-jest.mock('../src/services/authService', () => ({
+jest.mock('../src/services/auth/authService', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 1, role: 'admin', properties: [1] })
 }));
-jest.mock('../src/services/tokenBlacklistService', () => ({
+jest.mock('../src/services/auth/tokenBlacklistService', () => ({
   isTokenBlacklisted: jest.fn().mockResolvedValue(false)
 }));
 

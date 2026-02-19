@@ -1,5 +1,5 @@
-const AuthService = require('../services/authService');
-const TokenBlacklistService = require('../services/tokenBlacklistService');
+const AuthService = require('../services/auth/authService');
+const TokenBlacklistService = require('../services/auth/tokenBlacklistService');
 const { USER_ROLES, HTTP_STATUS } = require('../utils/constants');
 
 // Authenticate user with JWT token

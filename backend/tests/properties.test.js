@@ -4,11 +4,11 @@ const Database = require('../src/utils/database');
 
 // Mock database
 jest.mock('../src/utils/database');
-jest.mock('../src/services/authService', () => ({
+jest.mock('../src/services/auth/authService', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 1, role: 'admin', properties: [1] }),
   generateToken: jest.fn().mockReturnValue('mock_new_token')
 }));
-jest.mock('../src/services/tokenBlacklistService', () => ({
+jest.mock('../src/services/auth/tokenBlacklistService', () => ({
   isTokenBlacklisted: jest.fn().mockResolvedValue(false)
 }));
 

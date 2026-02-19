@@ -1,4 +1,4 @@
-const PrivacyService = require('../services/privacyService');
+const PrivacyService = require('../services/tenants/privacyService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class PrivacyController {

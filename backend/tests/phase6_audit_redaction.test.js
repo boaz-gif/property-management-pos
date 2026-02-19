@@ -1,9 +1,9 @@
-jest.mock('../src/services/auditService', () => ({
+jest.mock('../src/services/auth/auditService', () => ({
   logOperation: jest.fn().mockResolvedValue({ id: 1 })
 }));
 
 const { auditMiddleware } = require('../src/middleware/auditMiddleware');
-const AuditService = require('../src/services/auditService');
+const AuditService = require('../src/services/auth/auditService');
 
 describe('auditMiddleware redaction', () => {
   beforeEach(() => {

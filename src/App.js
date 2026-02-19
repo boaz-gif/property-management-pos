@@ -14,8 +14,8 @@ import queryClient from './services/query-client';
 
 // Lazy loaded components for code splitting
 const Login = lazy(() => import('./features/auth/pages/Login'));
-const Unauthorized = lazy(() => import('./pages/error/Unauthorized'));
-const Forbidden = lazy(() => import('./pages/error/Forbidden'));
+const Unauthorized = lazy(() => import('./features/error/pages/Unauthorized'));
+const Forbidden = lazy(() => import('./features/error/pages/Forbidden'));
 
 // Super Admin Components - Lazy Loaded
 const SuperAdminDashboard = lazy(() => import('./pages/dashboard/super-admin/Dashboard'));
@@ -24,24 +24,24 @@ const AdminManagement = lazy(() => import('./pages/dashboard/super-admin/AdminMa
 const AuditLogs = lazy(() => import('./pages/dashboard/super-admin/AuditLogs'));
 
 // Admin Components - Lazy Loaded
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminDashboard = lazy(() => import('./features/dashboard/pages/AdminDashboard'));
 const AdminProperties = lazy(() => import('./features/properties/pages/AdminProperties'));
 const AdminPropertyDetail = lazy(() => import('./features/properties/pages/AdminPropertyDetail'));
-const AdminLeaseManagement = lazy(() => import('./pages/admin/AdminLeaseManagement'));
-const AdminPayments = lazy(() => import('./pages/admin/AdminPayments'));
+const AdminLeaseManagement = lazy(() => import('./features/leases/pages/AdminLeaseManagement'));
+const AdminPayments = lazy(() => import('./features/payments/pages/AdminPayments'));
 const RegisterAdmin = lazy(() => import('./features/auth/pages/RegisterAdmin'));
 const RegisterTenant = lazy(() => import('./features/auth/pages/RegisterTenant'));
 
 // Tenant Components - Lazy Loaded
-const TenantDashboard = lazy(() => import('./pages/tenant/Dashboard'));
-const PayRent = lazy(() => import('./pages/tenant/PayRent'));
-const PaymentHistory = lazy(() => import('./pages/tenant/PaymentHistory'));
-const PaymentMethods = lazy(() => import('./pages/tenant/PaymentMethods'));
-const AutoPaySetup = lazy(() => import('./pages/tenant/AutoPaySetup'));
-const BalanceStatement = lazy(() => import('./pages/tenant/BalanceStatement'));
-const Maintenance = lazy(() => import('./pages/tenant/Maintenance'));
-const Documents = lazy(() => import('./pages/Documents'));
-const CommunicationHub = lazy(() => import('./pages/CommunicationHub'));
+const TenantDashboard = lazy(() => import('./features/tenants/pages/TenantDashboard'));
+const PayRent = lazy(() => import('./features/payments/pages/PayRent'));
+const PaymentHistory = lazy(() => import('./features/payments/pages/PaymentHistory'));
+const PaymentMethods = lazy(() => import('./features/payments/pages/PaymentMethods'));
+const AutoPaySetup = lazy(() => import('./features/payments/pages/AutoPaySetup'));
+const BalanceStatement = lazy(() => import('./features/payments/pages/BalanceStatement'));
+const Maintenance = lazy(() => import('./features/maintenance/pages/Maintenance'));
+const Documents = lazy(() => import('./features/tenants/pages/Documents'));
+const CommunicationHub = lazy(() => import('./features/communications/pages/CommunicationHub'));
 
 // Layout Components - Lazy Loaded
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));

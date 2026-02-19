@@ -1,4 +1,4 @@
-const PermissionService = require('../services/PermissionService');
+const PermissionService = require('../services/auth/PermissionService');
 
 function requirePermission(resource, action, options = {}) {
   return async (req, res, next) => {

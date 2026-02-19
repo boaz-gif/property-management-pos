@@ -1,4 +1,4 @@
-const TeamService = require('../services/teamService');
+const TeamService = require('../services/auth/teamService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class TeamController {

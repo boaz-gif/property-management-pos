@@ -1,10 +1,10 @@
 const LeaseCronJobs = require('../src/jobs/leaseCronJobs');
-const LeaseService = require('../src/services/leaseService');
-const NotificationService = require('../src/services/notificationService');
+const LeaseService = require('../src/services/tenants/leaseService');
+const NotificationService = require('../src/services/communications/notificationService');
 const Database = require('../src/utils/database');
 
-jest.mock('../src/services/leaseService');
-jest.mock('../src/services/notificationService');
+jest.mock('../src/services/tenants/leaseService');
+jest.mock('../src/services/communications/notificationService');
 jest.mock('../src/utils/database');
 
 describe('Phase 10: Configurable lease reminders', () => {

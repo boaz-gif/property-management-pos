@@ -13,9 +13,9 @@ const responseOptimizer = require('./src/middleware/response-optimizer');
 const rateLimiter = require('./src/middleware/rate-limiter');
 
 // Import routes
-const monitoringRoutes = require('./src/routes/monitoring-routes');
-const optimizedTenantRoutes = require('./src/routes/optimized-tenant-routes');
-const protectedRoutes = require('./src/routes/protected-routes');
+const monitoringRoutes = require('./src/routes/system/monitoring-routes');
+const optimizedTenantRoutes = require('./src/routes/tenants/optimized-tenant-routes');
+const protectedRoutes = require('./src/routes/system/protected-routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

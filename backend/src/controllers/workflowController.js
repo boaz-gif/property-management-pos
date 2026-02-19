@@ -1,4 +1,4 @@
-const WorkflowService = require('../services/workflowService');
+const WorkflowService = require('../services/maintenance/workflowService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class WorkflowController {

@@ -1,4 +1,4 @@
-const AuditService = require('../services/auditService');
+const AuditService = require('../services/auth/auditService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 /**

@@ -1,5 +1,5 @@
-const MpesaService = require('../services/mpesaService');
-const MpesaSettingsService = require('../services/mpesaSettingsService');
+const MpesaService = require('../services/payments/mpesaService');
+const MpesaSettingsService = require('../services/payments/mpesaSettingsService');
 
 class MpesaController {
   static async callback(req, res, next) {

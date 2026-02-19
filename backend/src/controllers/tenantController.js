@@ -1,7 +1,7 @@
-const TenantService = require('../services/tenantService');
-const MaintenanceService = require('../services/maintenanceService');
-const PaymentService = require('../services/paymentService');
-const LeaseService = require('../services/leaseService');
+const TenantService = require('../services/tenants/tenantService');
+const MaintenanceService = require('../services/maintenance/maintenanceService');
+const PaymentService = require('../services/payments/paymentService');
+const LeaseService = require('../services/tenants/leaseService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class TenantController {

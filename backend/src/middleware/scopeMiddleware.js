@@ -1,4 +1,4 @@
-const PermissionService = require('../services/PermissionService');
+const PermissionService = require('../services/auth/PermissionService');
 
 const scopeMiddleware = async (req, res, next) => {
   const user = req.user;

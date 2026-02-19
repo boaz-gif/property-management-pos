@@ -1,5 +1,5 @@
 
-const TenantDashboardService = require('../services/tenantDashboardService');
+const TenantDashboardService = require('../services/dashboard/tenantDashboardService');
 const Tenant = require('../models/Tenant');
 
 const getTenantId = async (req) => {

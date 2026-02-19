@@ -1,4 +1,4 @@
-const OrganizationService = require('../services/organizationService');
+const OrganizationService = require('../services/auth/organizationService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class OrganizationController {

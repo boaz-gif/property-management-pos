@@ -1,4 +1,4 @@
-const adminDashboardService = require('../services/adminDashboardService');
+const adminDashboardService = require('../services/dashboard/adminDashboardService');
 const { HTTP_STATUS } = require('../utils/constants');
 const { logAuditAsync } = require('../middleware/auditMiddleware');
 

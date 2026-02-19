@@ -1,4 +1,4 @@
-const ConversationService = require('../services/conversationService');
+const ConversationService = require('../services/communications/conversationService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class ConversationController {

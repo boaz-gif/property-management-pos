@@ -1,7 +1,7 @@
 const Property = require('../models/Property');
-const ImageService = require('../services/imageService');
+const ImageService = require('../services/properties/imageService');
 const { HTTP_STATUS } = require('../utils/constants');
-const AuditService = require('../services/auditService');
+const AuditService = require('../services/auth/auditService');
 
 class ImageController {
   /**

@@ -1,4 +1,4 @@
-const PropertyLeaseService = require('../services/propertyLeaseService');
+const PropertyLeaseService = require('../services/tenants/propertyLeaseService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class PropertyLeaseController {

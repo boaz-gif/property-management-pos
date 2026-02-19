@@ -3,7 +3,7 @@ jest.mock('../src/utils/database', () => ({
 }));
 
 const db = require('../src/utils/database');
-const AuditService = require('../src/services/auditService');
+const AuditService = require('../src/services/auth/auditService');
 
 describe('AuditService detailed audit logs', () => {
   beforeEach(() => {

@@ -4,7 +4,7 @@ const Database = require('../../src/utils/database');
 
 jest.mock('../../src/utils/database');
 // We'll mock auth differently for different tests if needed, or use a generic one
-jest.mock('../../src/services/authService', () => ({
+jest.mock('../../src/services/auth/authService', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 1, role: 'tenant', property_id: 1 })
 }));
 

@@ -1,4 +1,4 @@
-const UnitService = require('../services/unitService');
+const UnitService = require('../services/properties/unitService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class UnitController {

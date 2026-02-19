@@ -1,6 +1,6 @@
 const cron = require('node-cron');
-const LeaseService = require('../services/leaseService');
-const NotificationService = require('../services/notificationService');
+const LeaseService = require('../services/tenants/leaseService');
+const NotificationService = require('../services/communications/notificationService');
 const Database = require('../utils/database');
 const logger = require('../utils/simpleLogger');
 

@@ -1,4 +1,4 @@
-const PropertyService = require('../services/propertyService');
+const PropertyService = require('../services/properties/propertyService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class PropertyController {
@@ -43,7 +43,7 @@ class PropertyController {
       // PHASE 1 FIX: After creating property, refresh user's JWT token
       // to include the new property in the properties array
       const User = require('../models/User');
-      const AuthService = require('../services/authService');
+      const AuthService = require('../services/auth/authService');
       
       const updatedUser = await User.findById(user.id);
       const newToken = AuthService.generateToken(updatedUser);

@@ -1,16 +1,16 @@
 const request = require('supertest');
 const app = require('../server');
 const Database = require('../src/utils/database');
-const ReceiptService = require('../src/services/ReceiptService');
-const NotificationService = require('../src/services/notificationService');
+const ReceiptService = require('../src/services/payments/ReceiptService');
+const NotificationService = require('../src/services/communications/notificationService');
 
 let mockCurrentUserId = 11;
 
 jest.mock('../src/utils/database');
-jest.mock('../src/services/ReceiptService');
-jest.mock('../src/services/notificationService');
-jest.mock('../src/services/mpesaService', () => {
-  const Actual = jest.requireActual('../src/services/mpesaService');
+jest.mock('../src/services/payments/ReceiptService');
+jest.mock('../src/services/communications/notificationService');
+jest.mock('../src/services/payments/mpesaService', () => {
+  const Actual = jest.requireActual('../src/services/payments/mpesaService');
   Actual.initiateStkPush = jest.fn().mockResolvedValue({
     merchant_request_id: 'm_1',
     checkout_request_id: 'ws_1',
@@ -20,13 +20,13 @@ jest.mock('../src/services/mpesaService', () => {
   });
   return Actual;
 });
-jest.mock('../src/services/authService', () => ({
+jest.mock('../src/services/auth/authService', () => ({
   verifyToken: jest.fn(() => ({ id: mockCurrentUserId }))
 }));
-jest.mock('../src/services/tokenBlacklistService', () => ({
+jest.mock('../src/services/auth/tokenBlacklistService', () => ({
   isTokenBlacklisted: jest.fn().mockResolvedValue(false)
 }));
-jest.mock('../src/services/PermissionService', () => ({
+jest.mock('../src/services/auth/PermissionService', () => ({
   ensurePermission: jest.fn().mockResolvedValue(true),
   ensurePropertyAccess: jest.fn().mockResolvedValue(true),
   ensureTenantAccess: jest.fn().mockResolvedValue(true),

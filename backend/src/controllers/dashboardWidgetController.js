@@ -1,4 +1,4 @@
-const DashboardWidgetService = require('../services/dashboardWidgetService');
+const DashboardWidgetService = require('../services/dashboard/dashboardWidgetService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class DashboardWidgetController {

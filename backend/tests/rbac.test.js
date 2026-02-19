@@ -1,4 +1,4 @@
-const PermissionService = require('../src/services/PermissionService');
+const PermissionService = require('../src/services/auth/PermissionService');
 const Database = require('../src/utils/database');
 
 jest.mock('../src/utils/database');

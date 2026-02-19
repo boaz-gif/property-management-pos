@@ -3,13 +3,13 @@ const app = require('../server');
 const Database = require('../src/utils/database');
 
 jest.mock('../src/utils/database');
-jest.mock('../src/services/authService', () => ({
+jest.mock('../src/services/auth/authService', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 7 })
 }));
-jest.mock('../src/services/tokenBlacklistService', () => ({
+jest.mock('../src/services/auth/tokenBlacklistService', () => ({
   isTokenBlacklisted: jest.fn().mockResolvedValue(false)
 }));
-jest.mock('../src/services/ReceiptService', () => ({
+jest.mock('../src/services/payments/ReceiptService', () => ({
   generateReceipt: jest.fn().mockResolvedValue({ filePath: 'uploads/receipts/test.pdf' })
 }));
 

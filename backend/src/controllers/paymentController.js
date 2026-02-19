@@ -1,5 +1,5 @@
-const PaymentService = require('../services/paymentService');
-const ReceiptService = require('../services/ReceiptService');
+const PaymentService = require('../services/payments/paymentService');
+const ReceiptService = require('../services/payments/ReceiptService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class PaymentController {

@@ -10,19 +10,19 @@ jest.mock('../src/models/Message', () => ({
   findById: jest.fn()
 }));
 
-jest.mock('../src/services/notificationService', () => ({
+jest.mock('../src/services/communications/notificationService', () => ({
   create: jest.fn().mockResolvedValue(null)
 }));
 
-jest.mock('../src/services/PermissionService', () => ({
+jest.mock('../src/services/auth/PermissionService', () => ({
   ensurePropertyAccess: jest.fn().mockResolvedValue(true),
   ensureTenantAccess: jest.fn().mockResolvedValue(true)
 }));
 
-const ConversationService = require('../src/services/conversationService');
+const ConversationService = require('../src/services/communications/conversationService');
 const Conversation = require('../src/models/Conversation');
 const Message = require('../src/models/Message');
-const PermissionService = require('../src/services/PermissionService');
+const PermissionService = require('../src/services/auth/PermissionService');
 
 describe('ConversationService entity boundary enforcement', () => {
   afterEach(() => {

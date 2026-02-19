@@ -3,7 +3,7 @@ const app = require('../../server');
 const Database = require('../../src/utils/database');
 
 jest.mock('../../src/utils/database');
-jest.mock('../../src/services/authService', () => ({
+jest.mock('../../src/services/auth/authService', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 1, role: 'tenant', property_id: 1 })
 }));
 
