@@ -58,6 +58,7 @@ const schemas = {
   // Maintenance
   createMaintenance: Joi.object({
     title: Joi.string().min(3).max(100).required(),
+    description: Joi.string().optional(),
     priority: Joi.string().valid('low', 'medium', 'high').default('medium')
   })
 };

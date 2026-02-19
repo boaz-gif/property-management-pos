@@ -1,0 +1,76 @@
+﻿node.exe : [baseline-b
+rowser-mapping] The 
+data in this module 
+is over two months 
+old.  To ensure 
+accurate Baseline 
+data, please update: 
+`npm i baseline-browse
+r-mapping@latest -D`
+At C:\Program Files\no
+dejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([baseline-   
+ brows...ping@late    
+st -D`:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  console.log
+    reportWebVitals: called { enabled: false, fnType: 'function', isFn: false }
+
+      at reportWebVitals (src/reportWebVitals.js:5:11)
+
+  console.log
+    reportWebVitals: called { enabled: true, fnType: 'function', isFn: false }
+
+      at reportWebVitals (src/reportWebVitals.js:5:11)
+
+  console.log
+    reportWebVitals: starting import
+
+      at reportWebVitals (src/reportWebVitals.js:12:13)
+
+  console.log
+    reportWebVitals: import success
+
+      at src/reportWebVitals.js:14:15
+
+(node:9484) [DEP0040] 
+DeprecationWarning: 
+The `punycode` module 
+is deprecated. Please 
+use a userland 
+alternative instead.
+(Use `node 
+--trace-deprecation 
+...` to show where 
+the warning was 
+created)
+PASS src/__tests__/rep
+ortWebVitals.test.js
+  reportWebVitals
+    ΓêÜ does nothing 
+when diagnostics 
+disabled (39 ms)
+    ΓêÜ reports 
+metrics to callback 
+and window sink when 
+enabled (119 ms)
+
+Test Suites: 1 
+passed, 1 total
+Tests:       2 
+passed, 2 total
+Snapshots:   0 total
+Time:        4.009 s
+Ran all test suites 
+matching 
+/reportWebVitals/i.

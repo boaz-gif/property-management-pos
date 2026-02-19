@@ -1,6 +1,11 @@
 const Database = require('../utils/database');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
 
-class Lease {
+class Lease extends BaseSoftDeleteModel {
+  constructor() {
+    super('leases', Database);
+  }
+
   static async create(leaseData, createdBy) {
     const { tenantId, propertyId, unit, rent, startDate, endDate, status } = leaseData;
 
@@ -60,8 +65,8 @@ class Lease {
                ELSE l.status
              END as status_display
       FROM leases l
-      JOIN properties p ON l.property_id = p.id
-      WHERE l.tenant_id = $1
+      JOIN properties p ON l.property_id = p.id AND p.deleted_at IS NULL
+      WHERE l.tenant_id = $1 AND l.deleted_at IS NULL
       ORDER BY l.created_at DESC
       LIMIT 1
     `;
@@ -76,7 +81,7 @@ class Lease {
     // Validate permissions
     if (user.role === 'tenant') {
       // Tenants can only terminate their own leases
-      const leaseCheck = await Database.query('SELECT tenant_id FROM leases WHERE id = $1', [leaseId]);
+      const leaseCheck = await Database.query('SELECT tenant_id FROM leases WHERE id = $1 AND deleted_at IS NULL', [leaseId]);
       if (leaseCheck.rows.length === 0 || parseInt(leaseCheck.rows[0].tenant_id) !== parseInt(user.property_id)) {
         throw new Error('Access denied');
       }
@@ -104,7 +109,7 @@ class Lease {
     const query = `
       UPDATE leases
       SET ${updates.join(', ')}
-      WHERE id = $1
+      WHERE id = $1 AND deleted_at IS NULL
       RETURNING *
     `;
 
@@ -127,7 +132,7 @@ class Lease {
 
   static async getLeasesByProperty(propertyId, user) {
     if (user.role === 'admin') {
-      const propertyCheck = await Database.query('SELECT id FROM properties WHERE id = $1 AND admin_id = $2', [propertyId, user.id]);
+      const propertyCheck = await Database.query('SELECT id FROM properties WHERE id = $1 AND admin_id = $2 AND deleted_at IS NULL', [propertyId, user.id]);
       if (propertyCheck.rows.length === 0) {
         throw new Error('Access denied');
       }
@@ -142,13 +147,59 @@ class Lease {
                ELSE l.status
              END as status_display
       FROM leases l
-      JOIN tenants t ON l.tenant_id = t.id
-      WHERE l.property_id = $1
+      JOIN tenants t ON l.tenant_id = t.id AND t.deleted_at IS NULL
+      WHERE l.property_id = $1 AND l.deleted_at IS NULL
       ORDER BY l.end_date ASC
     `;
 
     const result = await Database.query(query, [propertyId]);
     return result.rows;
+  }
+
+  static async archive(id, user) {
+    const query = `
+      UPDATE leases 
+      SET deleted_at = CURRENT_TIMESTAMP, deleted_by = $1 
+      WHERE id = $2 AND deleted_at IS NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [user.id, id]);
+    return result.rows[0];
+  }
+
+  static async restore(id, user) {
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      throw new Error('Only admins can restore archived leases');
+    }
+    
+    const query = `
+      UPDATE leases 
+      SET deleted_at = NULL, deleted_by = NULL 
+      WHERE id = $1 AND deleted_at IS NOT NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Lease not found or not archived');
+    }
+    
+    return result.rows[0];
+  }
+
+  static async permanentDelete(id, user) {
+    if (user.role !== 'super_admin') {
+      throw new Error('Only super admins can permanently delete records');
+    }
+    
+    const query = 'DELETE FROM leases WHERE id = $1 RETURNING *';
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Lease not found');
+    }
+    
+    return result.rows[0];
   }
 }
 

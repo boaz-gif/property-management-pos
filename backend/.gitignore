@@ -2,7 +2,7 @@
 node_modules
 
 # Environment Variables
-.env
+# .env
 
 # Logs
 logs
@@ -18,7 +18,7 @@ pids
 coverage/
 
 # Uploads
-uploads/*
+# uploads/*
 
 # IDE
 .vscode/

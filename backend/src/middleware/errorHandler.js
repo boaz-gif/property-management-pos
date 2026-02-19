@@ -43,6 +43,17 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: HTTP_STATUS.BAD_REQUEST };
   }
 
+  if (!error.statusCode && typeof error.message === 'string') {
+    const msg = error.message.toLowerCase();
+    if (msg.startsWith('access denied') || msg === 'forbidden') {
+      error.statusCode = HTTP_STATUS.FORBIDDEN;
+    } else if (msg.includes('not found')) {
+      error.statusCode = HTTP_STATUS.NOT_FOUND;
+    } else if (msg.includes('is required') || msg.includes('must be greater') || msg.includes('no data provided')) {
+      error.statusCode = HTTP_STATUS.BAD_REQUEST;
+    }
+  }
+
   res.status(error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
     error: error.message || 'Server Error',

@@ -1,62 +1,158 @@
 const Database = require('../utils/database');
 const { TENANT_STATUS } = require('../utils/constants');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
+const Pagination = require('../utils/pagination');
+const Cache = require('../utils/cache');
+const Unit = require('./Unit');
 
-class Tenant {
-  static async findAll(userRole, userProperties, userPropertyId) {
-    let query = `
-      SELECT t.*, 
-             p.name as property_name,
-             p.address as property_address,
-             u.name as property_admin,
-             COUNT(pm.id) as payment_count,
-             COUNT(CASE WHEN pm.status = 'completed' THEN 1 END) as completed_payments,
-             COALESCE(SUM(CASE WHEN pm.status = 'completed' THEN pm.amount ELSE 0 END), 0) as total_paid,
-             COALESCE(SUM(CASE WHEN pm.status = 'pending' THEN pm.amount ELSE 0 END), 0) as total_pending,
-             COUNT(m.id) as maintenance_count,
-             COUNT(CASE WHEN m.status = 'open' THEN 1 END) as open_maintenance
-      FROM tenants t
-      LEFT JOIN properties p ON t.property_id = p.id
-      LEFT JOIN users u ON p.admin_id = u.id
-      LEFT JOIN payments pm ON t.id = pm.tenant_id
-      LEFT JOIN maintenance m ON t.id = m.tenant_id
-    `;
-    
-    let whereClause = '';
-    let params = [];
-    
-    // Role-based filtering
-    if (userRole === 'tenant') {
-      whereClause = ' WHERE t.id = $1';
-      params = [userPropertyId];
-    } else if (userRole === 'admin' && userProperties && userProperties.length > 0) {
-      whereClause = ' WHERE t.property_id = ANY($1)';
-      params = [userProperties];
-    }
-    
-    query += whereClause + ' GROUP BY t.id, p.name, p.address, u.name ORDER BY t.created_at DESC';
-    
-    const result = await Database.query(query, params);
-    return result.rows;
+class Tenant extends BaseSoftDeleteModel {
+  constructor() {
+    super('tenants', Database);
   }
 
-  static async findById(id, userRole, userProperties, userPropertyId) {
-    // Check access permissions
-    if (userRole === 'tenant' && parseInt(id) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
+  static async findAll(user, paginationOptions = {}) {
+    const { role, id: userId } = user;
     
-    if (userRole === 'admin' && userProperties && userProperties.length > 0) {
-      // Verify tenant belongs to admin's property
-      const propertyCheck = await Database.query(
-        'SELECT property_id FROM tenants WHERE id = $1',
+    // Parse pagination parameters
+    const pagination = Pagination.parseQuery(paginationOptions, {
+      defaultLimit: 20,
+      maxLimit: 100
+    });
+    
+    // Generate cache key
+    const cacheKey = Cache.generateKey('tenant', 'findAll', {
+      role,
+      userId,
+      page: pagination.page,
+      limit: pagination.limit,
+      sort: pagination.sort,
+      order: pagination.order
+    });
+    
+    // Use cache wrapper
+    return await Cache.cacheQuery(cacheKey, async () => {
+      // Use materialized view for massive performance improvement
+      let query = `
+        SELECT 
+          id, property_id, name, email, unit, tenant_status, rent, balance, 
+          created_at, updated_at, property_name, property_address, admin_id as property_admin_id,
+          payment_count, completed_payments, total_paid, total_pending,
+          maintenance_count, open_maintenance, payment_status, 
+          occupancy_percentage, has_maintenance_issues
+        FROM mv_tenant_aggregations
+      `;
+      
+      let whereClause = '';
+      let params = [];
+      let paramIndex = 1;
+      
+      if (role === 'tenant') {
+        whereClause = ` WHERE user_id = $${paramIndex}`;
+        params = [userId];
+        paramIndex++;
+      } else if (role === 'admin') {
+        whereClause = ` WHERE property_admin_id = $${paramIndex}`;
+        params = [userId];
+        paramIndex++;
+      }
+      
+      query += whereClause + Pagination.buildOrderBy(pagination, 'created_at');
+      
+      // Add pagination with correct parameter indexing
+      if (pagination.offset !== null) {
+        query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        params = [...params, pagination.limit, pagination.offset];
+      } else {
+        query += ` LIMIT $${paramIndex}`;
+        params = [...params, pagination.limit];
+      }
+      
+      const result = await Database.query(query, params);
+      
+      // Get admin names separately to avoid joins in main query
+      if (result.rows.length > 0) {
+        const adminIds = [...new Set(result.rows.map(row => row.property_admin_id).filter(id => id))];
+        
+        if (adminIds.length > 0) {
+          const adminQuery = `
+            SELECT id, name 
+            FROM users 
+            WHERE id = ANY($1) AND deleted_at IS NULL
+          `;
+          const adminResult = await Database.query(adminQuery, [adminIds]);
+          const adminMap = new Map(adminResult.rows.map(admin => [admin.id, admin.name]));
+          
+          // Add admin names to results
+          result.rows.forEach(row => {
+            row.property_admin = adminMap.get(row.property_admin_id) || null;
+          });
+        }
+      }
+      
+      return result.rows;
+    }, 1800); // Cache for 30 minutes
+  }
+
+  static async findById(id, user) {
+    const { role, id: userId } = user;
+    
+    if (role === 'tenant') {
+      const ownerCheck = await Database.query(
+        'SELECT user_id FROM tenants WHERE id = $1 AND deleted_at IS NULL',
         [id]
       );
-      
-      if (propertyCheck.rows.length === 0 || !userProperties.includes(propertyCheck.rows[0].property_id)) {
+      if (ownerCheck.rows.length === 0 || ownerCheck.rows[0].user_id !== userId) {
         throw new Error('Access denied');
       }
+    } else if (role === 'admin') {
+      const ownerCheck = await Database.query(
+        `
+        SELECT 1
+        FROM tenants t
+        JOIN properties p ON p.id = t.property_id AND p.deleted_at IS NULL
+        WHERE t.id = $1 AND t.deleted_at IS NULL AND p.admin_id = $2
+        LIMIT 1
+        `,
+        [id, userId]
+      );
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
     }
     
+    // Use materialized view for performance
+    const query = `
+      SELECT 
+        id, property_id, name, email, unit, tenant_status, rent, balance, 
+        created_at, updated_at, property_name, property_address, admin_id as property_admin_id,
+        payment_count, completed_payments, total_paid, total_pending,
+        maintenance_count, open_maintenance, payment_status, 
+        occupancy_percentage, has_maintenance_issues
+      FROM mv_tenant_aggregations
+      WHERE id = $1
+    `;
+    
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      return null;
+    }
+    
+    const tenant = result.rows[0];
+    
+    // Get admin name
+    if (tenant.property_admin_id) {
+      const adminQuery = `
+        SELECT name 
+        FROM users 
+        WHERE id = $1 AND deleted_at IS NULL
+      `;
+      const adminResult = await Database.query(adminQuery, [tenant.property_admin_id]);
+      tenant.property_admin = adminResult.rows[0]?.name || null;
+    }
+    
+    return tenant;
+  }
+
+  static async findByUserId(userId) {
     const query = `
       SELECT t.*, 
              p.name as property_name,
@@ -69,34 +165,89 @@ class Tenant {
              COUNT(m.id) as maintenance_count,
              COUNT(CASE WHEN m.status = 'open' THEN 1 END) as open_maintenance
       FROM tenants t
-      LEFT JOIN properties p ON t.property_id = p.id
-      LEFT JOIN users u ON p.admin_id = u.id
-      LEFT JOIN payments pm ON t.id = pm.tenant_id
-      LEFT JOIN maintenance m ON t.id = m.tenant_id
-      WHERE t.id = $1
+      LEFT JOIN properties p ON t.property_id = p.id AND p.deleted_at IS NULL
+      LEFT JOIN users u ON p.admin_id = u.id AND u.deleted_at IS NULL
+      LEFT JOIN payments pm ON t.id = pm.tenant_id AND pm.deleted_at IS NULL
+      LEFT JOIN maintenance m ON t.id = m.tenant_id AND m.deleted_at IS NULL
+      WHERE t.user_id = $1
+      AND t.status = 'active'
+      AND t.deleted_at IS NULL
       GROUP BY t.id, p.name, p.address, u.name
     `;
     
-    const result = await Database.query(query, [id]);
+    const result = await Database.query(query, [userId]);
+    return result.rows[0];
+  }
+
+  static async findByEmail(email) {
+    const query = `
+      SELECT t.*, 
+             p.name as property_name,
+             p.address as property_address,
+             u.name as property_admin,
+             COUNT(pm.id) as payment_count,
+             COUNT(CASE WHEN pm.status = 'completed' THEN 1 END) as completed_payments,
+             COALESCE(SUM(CASE WHEN pm.status = 'completed' THEN pm.amount ELSE 0 END), 0) as total_paid,
+             COALESCE(SUM(CASE WHEN pm.status = 'pending' THEN pm.amount ELSE 0 END), 0) as total_pending,
+             COUNT(m.id) as maintenance_count,
+             COUNT(CASE WHEN m.status = 'open' THEN 1 END) as open_maintenance
+      FROM tenants t
+      LEFT JOIN properties p ON t.property_id = p.id AND p.deleted_at IS NULL
+      LEFT JOIN users u ON p.admin_id = u.id AND u.deleted_at IS NULL
+      LEFT JOIN payments pm ON t.id = pm.tenant_id AND pm.deleted_at IS NULL
+      LEFT JOIN maintenance m ON t.id = m.tenant_id AND m.deleted_at IS NULL
+      WHERE t.email = $1
+      AND t.status = 'active'
+      AND t.deleted_at IS NULL
+      GROUP BY t.id, p.name, p.address, u.name
+    `;
+    
+    const result = await Database.query(query, [email]);
     return result.rows[0];
   }
 
   static async create(tenantData, createdBy) {
-    const { name, email, property_id, unit, rent, move_in, status = TENANT_STATUS.ACTIVE, admin_id } = tenantData;
+    const { name, email, property_id, unit, rent, move_in, status = TENANT_STATUS.ACTIVE, admin_id, lease_start_date, lease_end_date } = tenantData;
+
+    const normalizedUnit = unit !== undefined && unit !== null ? String(unit).trim() : '';
+    if (!normalizedUnit) {
+      throw new Error('unit is required');
+    }
+
+    let resolvedUnitId = tenantData.unit_id ?? tenantData.unitId ?? null;
+    let resolvedUnitNumber = normalizedUnit;
+
+    if (resolvedUnitId) {
+      const unitRes = await Database.query(
+        'SELECT id, property_id, unit_number FROM units WHERE id = $1 AND deleted_at IS NULL',
+        [resolvedUnitId]
+      );
+      if (unitRes.rows.length === 0) throw new Error('Unit not found');
+      if (parseInt(unitRes.rows[0].property_id) !== parseInt(property_id)) {
+        throw new Error('Unit does not belong to this property');
+      }
+      resolvedUnitNumber = String(unitRes.rows[0].unit_number);
+    } else {
+      const existingUnit = await Unit.findByPropertyAndNumber(property_id, resolvedUnitNumber);
+      if (existingUnit) {
+        resolvedUnitId = existingUnit.id;
+      } else {
+        const createdUnit = await Unit.create(property_id, { unit_number: resolvedUnitNumber }, createdBy);
+        resolvedUnitId = createdUnit.id;
+      }
+    }
     
-    // Check if unit is already occupied
     const unitCheck = await Database.query(
-      'SELECT id FROM tenants WHERE property_id = $1 AND unit = $2 AND status = $3',
-      [property_id, unit, TENANT_STATUS.ACTIVE]
+      'SELECT id FROM tenants WHERE property_id = $1 AND unit = $2 AND status = $3 AND deleted_at IS NULL',
+      [property_id, resolvedUnitNumber, TENANT_STATUS.ACTIVE]
     );
     
     if (unitCheck.rows.length > 0) {
-      throw new Error(`Unit ${unit} is already occupied in this property`);
+      throw new Error(`Unit ${resolvedUnitNumber} is already occupied in this property`);
     }
     
-    // Check if tenant with email already exists
     const emailCheck = await Database.query(
-      'SELECT id FROM tenants WHERE email = $1',
+      'SELECT id FROM tenants WHERE email = $1 AND deleted_at IS NULL',
       [email]
     );
     
@@ -104,40 +255,55 @@ class Tenant {
       throw new Error('A tenant with this email already exists');
     }
     
-    // Convert move_in date to proper format for PostgreSQL
-    const formattedMoveInDate = this.formatDateForDatabase(move_in);
+    const formattedMoveInDate = move_in ? this.formatDateForDatabase(move_in) : null;
+    const formattedLeaseStartDate = lease_start_date ? this.formatDateForDatabase(lease_start_date) : formattedMoveInDate;
+    const formattedLeaseEndDate = lease_end_date ? this.formatDateForDatabase(lease_end_date) : null;
     
     const query = `
-      INSERT INTO tenants (name, email, property_id, unit, rent, balance, move_in, status, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, 0, $6, $7, NOW(), NOW())
+      INSERT INTO tenants (name, email, property_id, unit, unit_id, rent, balance, move_in, status, user_id, lease_start_date, lease_end_date, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8, $9, $10, $11, NOW(), NOW())
       RETURNING *
     `;
     
-    const values = [name, email, property_id, unit, rent, formattedMoveInDate, status];
+    const values = [
+      name,
+      email,
+      property_id,
+      resolvedUnitNumber,
+      resolvedUnitId,
+      rent,
+      formattedMoveInDate,
+      status,
+      createdBy,
+      formattedLeaseStartDate,
+      formattedLeaseEndDate
+    ];
     const result = await Database.query(query, values);
     
-    // Update property occupancy
-    await this.updatePropertyOccupancy(property_id);
+    // Invalidate cache for this tenant and property
+    await Cache.invalidateTenant(result.rows[0].id);
+    await Cache.invalidateProperty(property_id);
+    await Cache.invalidateMaterializedViews();
+    
+    // DB trigger handles occupancy update
+    // await this.updatePropertyOccupancy(property_id);
     
     return result.rows[0];
   }
   
-  // Add this helper method to format dates for database
   static formatDateForDatabase(dateStr) {
-    // If already in YYYY-MM-DD format, return as-is
+    if (!dateStr) return null;
+    
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
     
-    // Parse the date using our existing parseDate method
     const date = this.parseDate(dateStr);
     
-    // Check if date is valid
     if (isNaN(date.getTime())) {
       throw new Error(`Invalid date format: ${dateStr}`);
     }
     
-    // Format as YYYY-MM-DD for PostgreSQL
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -145,22 +311,19 @@ class Tenant {
     return `${year}-${month}-${day}`;
   }
   
-  // Add this helper method if not already present
   static parseDate(dateStr) {
-    // Clean the input string
+    if (!dateStr) return new Date(NaN);
+    
     dateStr = dateStr.trim();
   
-    // Try YYYY-MM-DD format first
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const date = new Date(dateStr);
       return isNaN(date.getTime()) ? new Date(NaN) : date;
     }
   
-    // Try MM/DD/YYYY format
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
       const parts = dateStr.split('/');
     
-      // Validate we have exactly 3 parts
       if (parts.length !== 3) {
         return new Date(NaN);
       }
@@ -169,30 +332,24 @@ class Tenant {
       const dayStr = parts[1];
       const yearStr = parts[2];
     
-      // Parse as integers
       const month = parseInt(monthStr, 10);
       const day = parseInt(dayStr, 10);
       const year = parseInt(yearStr, 10);
     
-      // Validate year
       if (isNaN(year) || year < 1900 || year > 2100) {
         return new Date(NaN);
       }
     
-      // Validate month (1-12, since we're dealing with user input)
       if (isNaN(month) || month < 1 || month > 12) {
         return new Date(NaN);
       }
     
-      // Validate day (1-31, basic validation)
       if (isNaN(day) || day < 1 || day > 31) {
         return new Date(NaN);
       }
     
-      // Create date object (month is 0-indexed in JavaScript)
       const date = new Date(year, month - 1, day);
     
-      // Check if the date is valid (e.g., February 30th would be invalid)
       if (date.getMonth() !== month - 1 || date.getDate() !== day) {
         return new Date(NaN);
       }
@@ -200,10 +357,8 @@ class Tenant {
       return date;
     }
   
-    // Try parsing as-is (for other formats)
     const parsedDate = new Date(dateStr);
   
-    // Check if the parsed date is valid
     if (isNaN(parsedDate.getTime())) {
       return new Date(NaN);
     }
@@ -211,40 +366,77 @@ class Tenant {
     return parsedDate;
   }
 
-  static async update(id, tenantData, userRole, userProperties, userPropertyId) {
-    // Check access permissions
-    if (userRole === 'tenant' && parseInt(id) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
-    
-    if (userRole === 'admin' && userProperties && userProperties.length > 0) {
-      // Verify tenant belongs to admin's property
-      const propertyCheck = await Database.query(
-        'SELECT property_id FROM tenants WHERE id = $1',
-        [id]
+  static async update(id, tenantData, user) {
+    const { role, id: userId } = user;
+
+    if (role === 'tenant') {
+      const ownerCheck = await Database.query(
+        'SELECT 1 FROM tenants WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL LIMIT 1',
+        [id, userId]
       );
-      
-      if (propertyCheck.rows.length === 0 || !userProperties.includes(propertyCheck.rows[0].property_id)) {
-        throw new Error('Access denied');
-      }
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
+    } else if (role === 'admin') {
+      const ownerCheck = await Database.query(
+        `
+        SELECT 1
+        FROM tenants t
+        JOIN properties p ON p.id = t.property_id AND p.deleted_at IS NULL
+        WHERE t.id = $1 AND t.deleted_at IS NULL AND p.admin_id = $2
+        LIMIT 1
+        `,
+        [id, userId]
+      );
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
     }
     
-    // Get current tenant data
-    const currentTenant = await Database.query('SELECT * FROM tenants WHERE id = $1', [id]);
+    const currentTenant = await Database.query('SELECT * FROM tenants WHERE id = $1 AND deleted_at IS NULL', [id]);
     if (currentTenant.rows.length === 0) {
       throw new Error('Tenant not found');
     }
     
     const current = currentTenant.rows[0];
+
+    const nextPropertyId = tenantData.property_id !== undefined ? tenantData.property_id : current.property_id;
+
+    let resolvedNextUnitId = tenantData.unit_id ?? tenantData.unitId ?? undefined;
+    let resolvedNextUnitNumber =
+      tenantData.unit !== undefined && tenantData.unit !== null ? String(tenantData.unit).trim() : undefined;
+
+    if (resolvedNextUnitId !== undefined) {
+      const unitRes = await Database.query(
+        'SELECT id, property_id, unit_number FROM units WHERE id = $1 AND deleted_at IS NULL',
+        [resolvedNextUnitId]
+      );
+      if (unitRes.rows.length === 0) throw new Error('Unit not found');
+      if (parseInt(unitRes.rows[0].property_id) !== parseInt(nextPropertyId)) {
+        throw new Error('Unit does not belong to this property');
+      }
+      if (!resolvedNextUnitNumber) resolvedNextUnitNumber = String(unitRes.rows[0].unit_number);
+      resolvedNextUnitId = unitRes.rows[0].id;
+    }
+
+    if (resolvedNextUnitNumber !== undefined) {
+      const normalizedNextUnit = String(resolvedNextUnitNumber).trim();
+      if (!normalizedNextUnit) throw new Error('unit is required');
+      resolvedNextUnitNumber = normalizedNextUnit;
+
+      if (resolvedNextUnitId === undefined) {
+        const existingUnit = await Unit.findByPropertyAndNumber(nextPropertyId, resolvedNextUnitNumber);
+        if (existingUnit) {
+          resolvedNextUnitId = existingUnit.id;
+        } else {
+          const createdUnit = await Unit.create(nextPropertyId, { unit_number: resolvedNextUnitNumber }, userId);
+          resolvedNextUnitId = createdUnit.id;
+        }
+      }
+    }
     
-    // Build dynamic update query
     const updateFields = [];
     const values = [];
     let paramCount = 1;
     let propertyChanged = false;
     let unitChanged = false;
     
-    // Only include fields that are provided
     if (tenantData.name !== undefined) {
       updateFields.push(`name = $${paramCount}`);
       values.push(tenantData.name);
@@ -252,10 +444,9 @@ class Tenant {
     }
     
     if (tenantData.email !== undefined) {
-      // Check if email is already used by another tenant
       if (tenantData.email !== current.email) {
         const emailCheck = await Database.query(
-          'SELECT id FROM tenants WHERE email = $1 AND id != $2',
+          'SELECT id FROM tenants WHERE email = $1 AND id != $2 AND deleted_at IS NULL',
           [tenantData.email, id]
         );
         
@@ -273,28 +464,55 @@ class Tenant {
       if (tenantData.property_id !== current.property_id) {
         propertyChanged = true;
       }
+
+      if (role === 'admin') {
+        const newPropCheck = await Database.query(
+          'SELECT 1 FROM properties WHERE id = $1 AND admin_id = $2 AND deleted_at IS NULL LIMIT 1',
+          [tenantData.property_id, userId]
+        );
+        if (newPropCheck.rows.length === 0) {
+          throw new Error('Access denied: You cannot move tenants to this property');
+        }
+      }
+
       updateFields.push(`property_id = $${paramCount}`);
       values.push(tenantData.property_id);
       paramCount++;
     }
+
+    if (propertyChanged) {
+      const unitUpdateRequested =
+        tenantData.unit !== undefined || tenantData.unit_id !== undefined || tenantData.unitId !== undefined;
+      if (!unitUpdateRequested) {
+        throw new Error('unit is required when changing property');
+      }
+    }
     
-    if (tenantData.unit !== undefined) {
-      if (tenantData.unit !== current.unit) {
-        // Check if new unit is available
+    const unitUpdateRequested =
+      tenantData.unit !== undefined || tenantData.unit_id !== undefined || tenantData.unitId !== undefined;
+
+    if (unitUpdateRequested) {
+      if (resolvedNextUnitNumber !== undefined && resolvedNextUnitNumber !== current.unit) {
         const unitCheck = await Database.query(
-          'SELECT id FROM tenants WHERE property_id = $1 AND unit = $2 AND status = $3 AND id != $4',
-          [tenantData.property_id || current.property_id, tenantData.unit, TENANT_STATUS.ACTIVE, id]
+          'SELECT id FROM tenants WHERE property_id = $1 AND unit = $2 AND status = $3 AND id != $4 AND deleted_at IS NULL',
+          [nextPropertyId, resolvedNextUnitNumber, TENANT_STATUS.ACTIVE, id]
         );
         
         if (unitCheck.rows.length > 0) {
-          throw new Error(`Unit ${tenantData.unit} is already occupied in this property`);
+          throw new Error(`Unit ${resolvedNextUnitNumber} is already occupied in this property`);
         }
         
         unitChanged = true;
       }
       
       updateFields.push(`unit = $${paramCount}`);
-      values.push(tenantData.unit);
+      values.push(resolvedNextUnitNumber ?? current.unit);
+      paramCount++;
+    }
+
+    if (resolvedNextUnitId !== undefined) {
+      updateFields.push(`unit_id = $${paramCount}`);
+      values.push(resolvedNextUnitId);
       paramCount++;
     }
     
@@ -311,7 +529,6 @@ class Tenant {
     }
     
     if (tenantData.move_in !== undefined) {
-      // Format move_in date for database
       const formattedMoveInDate = this.formatDateForDatabase(tenantData.move_in);
       updateFields.push(`move_in = $${paramCount}`);
       values.push(formattedMoveInDate);
@@ -319,7 +536,6 @@ class Tenant {
     }
     
     if (tenantData.status !== undefined) {
-      // Validate status transitions
       if (!this.isValidStatusTransition(current.status, tenantData.status)) {
         throw new Error(`Cannot change status from ${current.status} to ${tenantData.status}`);
       }
@@ -329,132 +545,189 @@ class Tenant {
       paramCount++;
     }
     
-    // Always update updated_at
     updateFields.push(`updated_at = NOW()`);
     
-    // Add WHERE clause parameter
     values.push(id);
     
-    if (updateFields.length === 1) { // Only updated_at
+    if (updateFields.length === 1) {
       throw new Error('No valid fields to update');
     }
     
     const query = `
       UPDATE tenants 
       SET ${updateFields.join(', ')}
-      WHERE id = $${paramCount}
+      WHERE id = $${paramCount} AND deleted_at IS NULL
       RETURNING *
     `;
     
     const result = await Database.query(query, values);
     const updatedTenant = result.rows[0];
     
-    // Update property occupancy if property or unit changed
+    /*
     if (propertyChanged || unitChanged) {
       await this.updatePropertyOccupancy(current.property_id);
       if (propertyChanged) {
         await this.updatePropertyOccupancy(updatedTenant.property_id);
       }
     }
+    */
     
     return updatedTenant;
   }
 
-  static async delete(id, userRole, userProperties, userPropertyId) {
-    // Check access permissions
-    if (userRole === 'tenant' && parseInt(id) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
-    
-    if (userRole === 'admin' && userProperties && userProperties.length > 0) {
-      // Verify tenant belongs to admin's property
-      const propertyCheck = await Database.query(
-        'SELECT property_id FROM tenants WHERE id = $1',
-        [id]
+  static async delete(id, user) {
+    return await this.archive(id, user);
+  }
+
+  static async archive(id, user) {
+    const { role, id: userId } = user;
+
+    if (role === 'tenant') {
+      const ownerCheck = await Database.query(
+        'SELECT 1 FROM tenants WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL LIMIT 1',
+        [id, userId]
       );
-      
-      if (propertyCheck.rows.length === 0 || !userProperties.includes(propertyCheck.rows[0].property_id)) {
-        throw new Error('Access denied');
-      }
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
+    }
+
+    if (role === 'admin') {
+      const ownerCheck = await Database.query(
+        `
+        SELECT 1
+        FROM tenants t
+        JOIN properties p ON p.id = t.property_id AND p.deleted_at IS NULL
+        WHERE t.id = $1 AND t.deleted_at IS NULL AND p.admin_id = $2
+        LIMIT 1
+        `,
+        [id, userId]
+      );
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
     }
     
-    // Check if tenant has unpaid balance
     const balanceCheck = await Database.query(
-      'SELECT balance FROM tenants WHERE id = $1',
+      'SELECT balance, property_id FROM tenants WHERE id = $1 AND deleted_at IS NULL',
       [id]
     );
     
-    if (balanceCheck.rows.length > 0 && parseFloat(balanceCheck.rows[0].balance) > 0) {
-      throw new Error('Cannot delete tenant with outstanding balance');
+    if (balanceCheck.rows.length === 0) {
+      throw new Error('Tenant not found or already archived');
     }
     
-    // Check if tenant has pending maintenance requests
+    if (parseFloat(balanceCheck.rows[0].balance) > 0) {
+      throw new Error('Cannot archive tenant with outstanding balance');
+    }
+    
     const maintenanceCheck = await Database.query(
-      'SELECT COUNT(*) as count FROM maintenance WHERE tenant_id = $1 AND status IN ($2, $3)',
+      'SELECT COUNT(*) as count FROM maintenance WHERE tenant_id = $1 AND status IN ($2, $3) AND deleted_at IS NULL',
       [id, 'open', 'in-progress']
     );
     
     if (parseInt(maintenanceCheck.rows[0].count) > 0) {
-      throw new Error('Cannot delete tenant with open maintenance requests');
+      throw new Error('Cannot archive tenant with open maintenance requests');
     }
     
-    // Get property_id before deletion
+    const propertyId = balanceCheck.rows[0].property_id;
+    
+    const query = `
+      UPDATE tenants 
+      SET deleted_at = CURRENT_TIMESTAMP, deleted_by = $1 
+      WHERE id = $2 AND deleted_at IS NULL 
+      RETURNING *
+    `;
+    
+    const result = await Database.query(query, [userId, id]);
+    
+    // await this.updatePropertyOccupancy(propertyId);
+    
+    return result.rows[0];
+  }
+
+  static async restore(id, user) {
+    const { role, id: userId } = user;
+    
+    if (role !== 'admin' && role !== 'super_admin') {
+      throw new Error('Only admins can restore archived tenants');
+    }
+    
+    if (role === 'admin') {
+      const ownerCheck = await Database.query(
+        `
+        SELECT 1
+        FROM tenants t
+        JOIN properties p ON p.id = t.property_id AND p.deleted_at IS NULL
+        WHERE t.id = $1 AND p.admin_id = $2
+        LIMIT 1
+        `,
+        [id, userId]
+      );
+      if (ownerCheck.rows.length === 0) throw new Error('Access denied');
+    }
+    
+    const query = `
+      UPDATE tenants 
+      SET deleted_at = NULL, deleted_by = NULL 
+      WHERE id = $1 AND deleted_at IS NOT NULL 
+      RETURNING *
+    `;
+    
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Tenant not found or not archived');
+    }
+    
+    // await this.updatePropertyOccupancy(result.rows[0].property_id);
+    
+    return result.rows[0];
+  }
+
+  static async permanentDelete(id, user) {
+    if (user.role !== 'super_admin') {
+      throw new Error('Only super admins can permanently delete records');
+    }
+    
     const propertyCheck = await Database.query(
       'SELECT property_id FROM tenants WHERE id = $1',
       [id]
     );
     
+    if (propertyCheck.rows.length === 0) {
+      throw new Error('Tenant not found');
+    }
+    
     const propertyId = propertyCheck.rows[0].property_id;
     
-    const query = 'DELETE FROM tenants WHERE id = $1';
-    await Database.query(query, [id]);
+    const query = 'DELETE FROM tenants WHERE id = $1 RETURNING *';
+    const result = await Database.query(query, [id]);
     
-    // Update property occupancy
-    await this.updatePropertyOccupancy(propertyId);
+    // await this.updatePropertyOccupancy(propertyId);
     
-    return { message: 'Tenant deleted successfully' };
+    return result.rows[0];
   }
 
   static async updateBalance(tenantId, amount, type) {
-    const query = `
-      UPDATE tenants 
-      SET balance = balance $1 $2, updated_at = NOW()
-      WHERE id = $3
-      RETURNING *
-    `;
-    
-    const operator = type === 'payment' ? '-' : '+';
-    const result = await Database.query(query, [operator, amount, tenantId]);
-    return result.rows[0];
+    // Deprecated: Balance is now managed by database triggers
+    console.warn('Tenant.updateBalance is deprecated. Use database triggers for balance updates.');
+    return null;
   }
 
+  /* Removed: Managed by DB View
   static async updatePropertyOccupancy(propertyId) {
-    const query = `
-      UPDATE properties 
-      SET occupied = (
-        SELECT COUNT(*) 
-        FROM tenants 
-        WHERE property_id = $1 AND status = 'active'
-      ),
-      updated_at = NOW()
-      WHERE id = $1
-      RETURNING *
-    `;
-    
-    const result = await Database.query(query, [propertyId]);
-    return result.rows[0];
+    ...
   }
+  */
 
-  static async getTenantStats(userRole, userProperties, userPropertyId) {
-    let whereClause = '';
+  static async getTenantStats(user) {
+    const { role, id: userId } = user;
+    let whereClause = ' WHERE deleted_at IS NULL';
     let params = [];
     
-    if (userRole === 'tenant') {
-      whereClause = ' WHERE id = $1';
-      params = [userPropertyId];
-    } else if (userRole === 'admin' && userProperties && userProperties.length > 0) {
-      whereClause = ' WHERE property_id = ANY($1)';
-      params = [userProperties];
+    if (role === 'tenant') {
+      whereClause += ' AND user_id = $1';
+      params = [userId];
+    } else if (role === 'admin') {
+      whereClause += ' AND property_id IN (SELECT id FROM properties WHERE admin_id = $1 AND deleted_at IS NULL)';
+      params = [userId];
     }
     
     const query = `
@@ -475,56 +748,53 @@ class Tenant {
     return result.rows[0];
   }
 
-  static async isValidStatusTransition(currentStatus, newStatus) {
+  static async findExpiringLeases(daysThreshold = 30) {
+    const query = `
+      SELECT t.id, t.name, t.email, t.unit, t.lease_end_date, t.status as lease_status, 
+             t.user_id as tenant_user_id, t.property_id,
+             p.name as property_name, 
+             u.email as admin_email, u.name as admin_name,
+             DATE_PART('day', t.lease_end_date - CURRENT_DATE) as days_remaining
+      FROM tenants t
+      JOIN properties p ON t.property_id = p.id AND p.deleted_at IS NULL
+      JOIN users u ON p.admin_id = u.id AND u.deleted_at IS NULL
+      WHERE t.lease_end_date IS NOT NULL
+        AND t.status = 'active'
+        AND t.lease_end_date > CURRENT_DATE
+        AND t.lease_end_date <= CURRENT_DATE + (INTERVAL '1 day' * $1)
+        AND t.deleted_at IS NULL
+    `;
+    const result = await Database.query(query, [daysThreshold]);
+    return result.rows;
+  }
+
+  static async findExpiredLeases() {
+    const query = `
+      SELECT t.id, t.name, t.email, t.unit, t.lease_end_date, t.status as lease_status, 
+             t.user_id as tenant_user_id, t.property_id,
+             p.name as property_name, 
+             u.email as admin_email, u.name as admin_name,
+             DATE_PART('day', CURRENT_DATE - t.lease_end_date) as days_expired
+      FROM tenants t
+      JOIN properties p ON t.property_id = p.id AND p.deleted_at IS NULL
+      JOIN users u ON p.admin_id = u.id AND u.deleted_at IS NULL
+      WHERE t.lease_end_date IS NOT NULL
+        AND t.status = 'active'
+        AND t.lease_end_date < CURRENT_DATE
+        AND t.deleted_at IS NULL
+    `;
+    const result = await Database.query(query);
+    return result.rows;
+  }
+
+  static isValidStatusTransition(currentStatus, newStatus) {
     const validTransitions = {
       [TENANT_STATUS.ACTIVE]: [TENANT_STATUS.ACTIVE, TENANT_STATUS.INACTIVE, TENANT_STATUS.EVICTED],
       [TENANT_STATUS.INACTIVE]: [TENANT_STATUS.ACTIVE, TENANT_STATUS.INACTIVE, TENANT_STATUS.EVICTED],
-      [TENANT_STATUS.EVICTED]: [TENANT_STATUS.EVICTED] // Evicted is final state
+      [TENANT_STATUS.EVICTED]: [TENANT_STATUS.EVICTED]
     };
     
     return validTransitions[currentStatus] && validTransitions[currentStatus].includes(newStatus);
-  }
-
-  static async getRentSchedule(tenantId, userRole, userPropertyId) {
-    // Check access permissions
-    if (userRole === 'tenant' && parseInt(tenantId) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
-    
-    const tenant = await Database.query(
-      'SELECT t.*, p.name as property_name FROM tenants t LEFT JOIN properties p ON t.property_id = p.id WHERE t.id = $1',
-      [tenantId]
-    );
-    
-    if (tenant.rows.length === 0) {
-      throw new Error('Tenant not found');
-    }
-    
-    const tenantData = tenant.rows[0];
-    
-    // Generate rent schedule for next 12 months
-    const schedule = [];
-    const currentDate = new Date();
-    const moveInDate = new Date(tenantData.move_in);
-    
-    for (let i = 0; i < 12; i++) {
-      const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
-      
-      // Skip months before move-in date
-      if (dueDate < moveInDate) continue;
-      
-      schedule.push({
-        due_date: dueDate.toISOString().split('T')[0],
-        amount: tenantData.rent,
-        status: 'pending',
-        paid_date: null
-      });
-    }
-    
-    return {
-      tenant: tenantData,
-      schedule
-    };
   }
 }
 

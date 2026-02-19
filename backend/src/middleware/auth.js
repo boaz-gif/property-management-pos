@@ -1,4 +1,5 @@
 const AuthService = require('../services/authService');
+const TokenBlacklistService = require('../services/tokenBlacklistService');
 const { USER_ROLES, HTTP_STATUS } = require('../utils/constants');
 
 // Authenticate user with JWT token
@@ -14,6 +15,16 @@ const authenticate = async (req, res, next) => {
     }
     
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    
+    // Check if token is blacklisted
+    const isBlacklisted = await TokenBlacklistService.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: 'Token has been revoked. Please log in again.',
+        code: 'TOKEN_REVOKED'
+      });
+    }
     
     // Verify token
     const decoded = AuthService.verifyToken(token);

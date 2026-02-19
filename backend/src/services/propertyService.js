@@ -1,11 +1,17 @@
 const Property = require('../models/Property');
 const { PROPERTY_STATUS, HTTP_STATUS } = require('../utils/constants');
+const cacheService = require('../utils/cacheService');
+const { getFlag } = require('../utils/featureFlags');
 
 class PropertyService {
   static async getAllProperties(user) {
-    const { role, properties: userProperties } = user;
-    
-    const properties = await Property.findAll(role, userProperties);
+    const cacheKey = `properties:list:${user.id}`;
+    if (getFlag('REDIS_CACHE_READS')) {
+      const cached = await cacheService.get(cacheKey);
+      if (cached) return cached;
+    }
+
+    const properties = await Property.findAll(user);
     
     // Calculate occupancy percentage for each property
     const propertiesWithStats = properties.map(property => ({
@@ -15,13 +21,16 @@ class PropertyService {
       available_units: property.units - property.active_tenants
     }));
     
+    if (getFlag('REDIS_CACHE_READS')) {
+      await cacheService.set(cacheKey, propertiesWithStats, 60); // 60s stats cache
+    }
+
     return propertiesWithStats;
   }
 
   static async getPropertyById(id, user) {
-    const { role, properties: userProperties } = user;
-    
-    const property = await Property.findById(id, role, userProperties);
+    const propertyId = parseInt(id);
+    const property = await Property.findById(propertyId, user);
     
     if (!property) {
       throw new Error('Property not found');
@@ -37,7 +46,7 @@ class PropertyService {
   }
 
   static async createProperty(propertyData, user) {
-    const { role } = user;
+    const { role, id } = user;
     
     // Only super_admin and admin can create properties
     if (role === 'tenant') {
@@ -47,32 +56,34 @@ class PropertyService {
     // Validate required fields
     const requiredFields = ['name', 'address', 'units', 'rent'];
     for (const field of requiredFields) {
-      if (!propertyData[field]) {
+      if (propertyData[field] === undefined || propertyData[field] === '' || propertyData[field] === null) {
         throw new Error(`${field} is required`);
       }
     }
     
     // Validate data types and ranges
-    if (propertyData.units <= 0) {
+    if (parseFloat(propertyData.units) <= 0) {
       throw new Error('Units must be greater than 0');
     }
     
-    if (propertyData.rent <= 0) {
+    if (parseFloat(propertyData.rent) <= 0) {
       throw new Error('Rent must be greater than 0');
     }
     
     // Set admin_id based on user role
-    if (role === 'admin') {
-      propertyData.admin_id = user.id;
+    propertyData.admin_id = id;
+    
+    const property = await Property.create(propertyData, id);
+    
+    if (getFlag('REDIS_CACHE_READS')) {
+      await cacheService.delPattern('properties:list:*');
     }
-    
-    const property = await Property.create(propertyData, user.id);
-    
+
     return property;
   }
 
   static async updateProperty(id, propertyData, user) {
-    const { role, properties: userProperties } = user;
+    const { role } = user;
     
     // Only super_admin and admin can update properties
     if (role === 'tenant') {
@@ -93,32 +104,38 @@ class PropertyService {
       throw new Error('Rent must be greater than 0');
     }
     
-    const property = await Property.update(id, propertyData, role, userProperties);
+    const property = await Property.update(id, propertyData, user);
     
     if (!property) {
       throw new Error('Property not found');
     }
     
+    if (getFlag('REDIS_CACHE_READS')) {
+      await cacheService.delPattern('properties:list:*');
+    }
+
     return property;
   }
 
   static async deleteProperty(id, user) {
-    const { role, properties: userProperties } = user;
+    const { role } = user;
     
     // Only super_admin and admin can delete properties
     if (role === 'tenant') {
       throw new Error('Access denied');
     }
     
-    await Property.delete(id, role, userProperties);
+    await Property.delete(id, user);
     
+    if (getFlag('REDIS_CACHE_READS')) {
+      await cacheService.delPattern('properties:list:*');
+    }
+
     return { message: 'Property deleted successfully' };
   }
 
   static async getPropertyStats(user) {
-    const { role, properties: userProperties } = user;
-    
-    const stats = await Property.getStats(role, userProperties);
+    const stats = await Property.getStats(user);
     
     return {
       total_properties: parseInt(stats.total_properties) || 0,
@@ -130,9 +147,29 @@ class PropertyService {
     };
   }
 
+  /* Removed: Managed by DB View
   static async updatePropertyOccupancy(propertyId) {
     const property = await Property.updateOccupancy(propertyId);
     return property;
+  }
+  */
+
+  static async searchProperties(query, user) {
+    const properties = await Property.findAll(user);
+    const filtered = properties.filter(p => 
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.address.toLowerCase().includes(query.toLowerCase())
+    );
+    return filtered;
+  }
+
+  static async exportPropertiesToCSV(user) {
+    const properties = await Property.findAll(user);
+    const csvHeaders = 'ID,Name,Address,Units,Rent,Occupancy\n';
+    const csvRows = properties.map(p => 
+      `${p.id},"${p.name}","${p.address}",${p.units},${p.rent},${p.occupancy}`
+    ).join('\n');
+    return csvHeaders + csvRows;
   }
 }
 

@@ -1,6 +1,7 @@
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
+const { ensureTraceContext } = require('./requestTrace');
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../../logs');
@@ -14,15 +15,26 @@ const accessLogStream = fs.createWriteStream(
   { flags: 'a' }
 );
 
-// Custom Morgan format
-const morganFormat = ':method :url :status :res[content-length] - :response-time ms';
+// Custom Morgan tokens
+morgan.token('traceId', (req) => req.traceId || '-');
+morgan.token('actionId', (req) => req.actionId || '-');
 
-const logger = morgan(morganFormat, {
+// Custom Morgan format
+const morganFormat = ':traceId :actionId :method :url :status :res[content-length] - :response-time ms';
+
+const morganMiddleware = morgan(morganFormat, {
   stream: accessLogStream
 });
 
+const logger = (req, res, next) => {
+  ensureTraceContext(req, res);
+  return morganMiddleware(req, res, next);
+};
+
 const errorLogger = (err, req, res, next) => {
   console.error(`${new Date().toISOString()} - ${err.message}`, {
+    traceId: req.traceId,
+    actionId: req.actionId,
     method: req.method,
     url: req.url,
     body: req.body,

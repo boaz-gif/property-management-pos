@@ -18,7 +18,7 @@ class DocumentController {
 
   static async getAllDocuments(req, res, next) {
     try {
-      const documents = await DocumentService.getAllDocuments(req.user);
+      const documents = await DocumentService.getAllDocuments(req.user, req.query);
       res.status(HTTP_STATUS.OK).json({
         success: true,
         data: documents
@@ -42,8 +42,7 @@ class DocumentController {
 
   static async downloadDocument(req, res, next) {
     try {
-      const filePath = await DocumentService.getFilePath(req.params.id, req.user);
-      res.download(filePath);
+      await DocumentService.streamDocument(req.params.id, req.user, res);
     } catch (error) {
       next(error);
     }
@@ -59,6 +58,34 @@ class DocumentController {
     } catch (error) {
       next(error);
     }
+  }
+
+  // Soft Delete Methods
+  static async archiveDocument(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await DocumentService.archiveDocument(id, req.user);
+      res.status(HTTP_STATUS.OK).json({ success: true, message: 'Document archived', data: result });
+    } catch (error) { next(error); }
+  }
+
+  static async restoreDocument(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await DocumentService.restoreDocument(id, req.user);
+      res.status(HTTP_STATUS.OK).json({ success: true, message: 'Document restored', data: result });
+    } catch (error) { next(error); }
+  }
+
+  static async permanentDeleteDocument(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (req.user.role !== 'super_admin') {
+        return res.status(HTTP_STATUS.FORBIDDEN).json({ error: 'Only super admins can permanently delete records' });
+      }
+      const result = await DocumentService.permanentDeleteDocument(id, req.user);
+      res.status(HTTP_STATUS.OK).json({ success: true, message: 'Document permanently deleted', data: result });
+    } catch (error) { next(error); }
   }
 }
 

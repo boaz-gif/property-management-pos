@@ -1,11 +1,203 @@
 const TenantService = require('../services/tenantService');
+const MaintenanceService = require('../services/maintenanceService');
+const PaymentService = require('../services/paymentService');
+const LeaseService = require('../services/leaseService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class TenantController {
+  // ============================================================================
+  // TENANT-SPECIFIC METHODS (Current logged-in tenant accessing own data)
+  // ============================================================================
+
+  /**
+   * GET /api/tenants/me
+   * Get current tenant's own record
+   * Security: Tenant can only access their own record
+   * PHASE 3: Uses user_id FK instead of email matching
+   */
+  static async getCurrentTenant(req, res, next) {
+    try {
+      const user = req.user;
+
+      // PHASE 3: Use user_id directly for cleaner lookup, with fallback to email
+      let tenant = null;
+      
+      if (user.id) {
+        tenant = await TenantService.getTenantByUserId(user.id);
+      }
+      
+      // Fallback to email-based lookup if user_id lookup fails
+      if (!tenant && user.email) {
+        tenant = await TenantService.getTenantByEmail(user.email, user);
+      }
+
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant record not found'
+        });
+      }
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: tenant
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/me/payments
+   * Get current tenant's payment history
+   * Security: Tenant sees only their own payments
+   * PHASE 3: Uses user_id FK for cleaner lookup
+   */
+  static async getCurrentTenantPayments(req, res, next) {
+    try {
+      const user = req.user;
+
+      // PHASE 3: Use user_id directly with fallback to email
+      let tenant = null;
+      
+      if (user.id) {
+        tenant = await TenantService.getTenantByUserId(user.id);
+      }
+      
+      // Fallback to email-based lookup if user_id lookup fails
+      if (!tenant && user.email) {
+        tenant = await TenantService.getTenantByEmail(user.email, user);
+      }
+
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant record not found'
+        });
+      }
+
+      // Get payments for this tenant
+      const payments = await PaymentService.getPaymentsByTenantId(tenant.id, user);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: payments || [],
+        count: (payments || []).length
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/me/maintenance
+   * Get current tenant's maintenance requests
+   * Security: Tenant sees only their own maintenance requests
+   * PHASE 3: Uses user_id FK for cleaner lookup
+   */
+  static async getCurrentTenantMaintenance(req, res, next) {
+    try {
+      const user = req.user;
+
+      // PHASE 3: Use user_id directly with fallback to email
+      let tenant = null;
+      
+      if (user.id) {
+        tenant = await TenantService.getTenantByUserId(user.id);
+      }
+      
+      // Fallback to email-based lookup if user_id lookup fails
+      if (!tenant && user.email) {
+        tenant = await TenantService.getTenantByEmail(user.email, user);
+      }
+
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant record not found'
+        });
+      }
+
+      // Get maintenance requests for this tenant
+      const maintenance = await MaintenanceService.getMaintenanceByTenantId(tenant.id, user);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: maintenance || [],
+        count: (maintenance || []).length
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PUT /api/tenants/me
+   * Update current tenant's own information
+   * Security: Tenant can only update their own record
+   * PHASE 3: Uses user_id FK for cleaner lookup
+   */
+  static async updateCurrentTenant(req, res, next) {
+    try {
+      const user = req.user;
+      const tenantData = req.body;
+
+      // PHASE 3: Use user_id directly with fallback to email
+      let tenant = null;
+      
+      if (user.id) {
+        tenant = await TenantService.getTenantByUserId(user.id);
+      }
+      
+      // Fallback to email-based lookup if user_id lookup fails
+      if (!tenant && user.email) {
+        tenant = await TenantService.getTenantByEmail(user.email, user);
+      }
+
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant record not found'
+        });
+      }
+
+      // Only allow tenants to update specific fields
+      const allowedFields = ['phone', 'emergency_contact', 'emergency_phone'];
+      const filteredData = {};
+      
+      allowedFields.forEach(field => {
+        if (tenantData[field] !== undefined) {
+          filteredData[field] = tenantData[field];
+        }
+      });
+
+      // Update tenant
+      const updatedTenant = await TenantService.updateTenant(tenant.id, filteredData, user);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Tenant information updated successfully',
+        data: updatedTenant
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ============================================================================
+  // ADMIN/SUPER-ADMIN METHODS (Managing all tenants)
+  // ============================================================================
+
   static async getAllTenants(req, res, next) {
     try {
       const user = req.user;
-      const tenants = await TenantService.getAllTenants(user);
+      const { includeArchived, onlyArchived } = req.query;
+      
+      // TODO: Implement includeArchived and onlyArchived in TenantService
+      const tenants = await TenantService.getAllTenants(user, { 
+        includeArchived: includeArchived === 'true',
+        onlyArchived: onlyArchived === 'true'
+      });
 
       res.status(HTTP_STATUS.OK).json({
         success: true,
@@ -324,6 +516,308 @@ class TenantController {
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  // ============================================================================
+  // LEASE MANAGEMENT METHODS
+  // ============================================================================
+
+  /**
+   * GET /api/tenants/:id/lease
+   * Get lease status and information for a specific tenant
+   */
+  static async getLeaseStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      // Verify user has access to this tenant
+      const tenant = await TenantService.getTenantById(id, user);
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant not found'
+        });
+      }
+
+      const leaseStatus = await LeaseService.getTenantLeaseStatus(id);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: leaseStatus
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PUT /api/tenants/:id/lease
+   * Update lease dates for a tenant (admin only)
+   */
+  static async updateLease(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { lease_start_date, lease_end_date } = req.body;
+      const user = req.user;
+
+      // Verify user has access to this tenant
+      const tenant = await TenantService.getTenantById(id, user);
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant not found'
+        });
+      }
+
+      // Validate lease dates
+      const validation = LeaseService.validateLeaseDates(lease_start_date, lease_end_date);
+      if (!validation.isValid) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          errors: validation.errors
+        });
+      }
+
+      const updatedTenant = await TenantService.updateTenantLease(id, {
+        lease_start_date,
+        lease_end_date
+      });
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Lease information updated successfully',
+        data: updatedTenant
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/tenants/:id/lease/renew
+   * Renew lease for a tenant (admin only)
+   */
+  static async renewLease(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { new_lease_end_date } = req.body;
+      const user = req.user;
+
+      if (!new_lease_end_date) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          error: 'new_lease_end_date is required'
+        });
+      }
+
+      // Verify user has access to this tenant
+      const tenant = await TenantService.getTenantById(id, user);
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant not found'
+        });
+      }
+
+      const renewedTenant = await LeaseService.renewLease(id, new_lease_end_date);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Lease renewed successfully',
+        data: renewedTenant
+      });
+    } catch (error) {
+      if (error.details) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          errors: error.details
+        });
+      }
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/:id/lease/history
+   * Get lease history for a tenant
+   */
+  static async getLeaseHistory(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      // Verify user has access to this tenant
+      const tenant = await TenantService.getTenantById(id, user);
+      if (!tenant) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          error: 'Tenant not found'
+        });
+      }
+
+      const history = await LeaseService.getTenantLeaseHistory(id);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: history
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/lease/expiring
+   * Get all leases expiring within specified days (admin/super admin only)
+   */
+  static async getExpiringLeases(req, res, next) {
+    try {
+      const { days = 30 } = req.query;
+
+      const expiringLeases = await LeaseService.findExpiringLeases(parseInt(days));
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: {
+          days_threshold: parseInt(days),
+          count: expiringLeases.length,
+          leases: expiringLeases
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/lease/expired
+   * Get all expired leases (admin/super admin only)
+   */
+  static async getExpiredLeases(req, res, next) {
+    try {
+      const expiredLeases = await LeaseService.findExpiredLeases();
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: {
+          count: expiredLeases.length,
+          leases: expiredLeases
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/tenants/lease/stats
+   * Get lease statistics (admin/super admin only)
+   */
+  static async getLeaseStatistics(req, res, next) {
+    try {
+      const stats = await LeaseService.getLeaseStatistics();
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ============================================================================
+  // SOFT DELETE METHODS
+  // ============================================================================
+
+  /**
+   * PUT /api/tenants/:id/archive
+   * Archive (soft delete) a tenant - Admin/Super Admin only
+   */
+  static async archiveTenant(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      // Authorization check
+      if (user.role !== 'admin' && user.role !== 'super_admin') {
+        return res.status(HTTP_STATUS.FORBIDDEN).json({ 
+          error: 'Only admins can archive tenants' 
+        });
+      }
+      
+      const result = await TenantService.archiveTenant(id, user);
+      
+      if (!result) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Tenant not found or already archived'
+        });
+      }
+      
+      res.status(HTTP_STATUS.OK).json({ 
+        success: true, 
+        message: 'Tenant archived successfully', 
+        data: result 
+      });
+    } catch (error) { 
+      next(error); 
+    }
+  }
+
+  /**
+   * PUT /api/tenants/:id/restore
+   * Restore an archived tenant - Admin/Super Admin only
+   */
+  static async restoreTenant(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      const result = await TenantService.restoreTenant(id, user);
+      
+      if (!result) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          error: 'Tenant not found or not archived'
+        });
+      }
+      
+      res.status(HTTP_STATUS.OK).json({ 
+        success: true, 
+        message: 'Tenant restored successfully', 
+        data: result 
+      });
+    } catch (error) { 
+      next(error); 
+    }
+  }
+
+  /**
+   * DELETE /api/tenants/:id/permanent
+   * Permanently delete a tenant - SUPER ADMIN ONLY with safety check
+   */
+  static async permanentDeleteTenant(req, res, next) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      
+      // Double protection
+      if (user.role !== 'super_admin') {
+        return res.status(HTTP_STATUS.FORBIDDEN).json({ 
+          error: 'Only super admins can permanently delete records' 
+        });
+      }
+      
+      const result = await TenantService.permanentDeleteTenant(id, user);
+      
+      res.status(HTTP_STATUS.OK).json({ 
+        success: true, 
+        message: 'Tenant permanently deleted', 
+        data: result 
+      });
+    } catch (error) { 
+      next(error); 
     }
   }
 }

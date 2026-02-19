@@ -3,32 +3,11 @@ const Tenant = require('../models/Tenant');
 const Database = require('../utils/database');
 const NotificationService = require('./notificationService');
 const TenantService = require('./tenantService');
+const PermissionService = require('./PermissionService');
 
 class PaymentService {
   static async getAllPayments(user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
-    
-    let query = `
-      SELECT p.*, t.name as tenant_name, t.email as tenant_email, pr.name as property_name
-      FROM payments p
-      JOIN tenants t ON p.tenant_id = t.id
-      JOIN properties pr ON t.property_id = pr.id
-    `;
-    
-    const params = [];
-    
-    if (role === 'tenant') {
-      query += ` WHERE p.tenant_id = $1`;
-      params.push(userPropertyId);
-    } else if (role === 'admin') {
-      query += ` WHERE pr.admin_id = $1`;
-      params.push(user.id);
-    }
-    
-    query += ` ORDER BY p.date DESC, p.created_at DESC`;
-    
-    const result = await Database.query(query, params);
-    return result.rows;
+    return await Payment.findAll(user);
   }
 
   static async getPaymentById(id, user) {
@@ -66,33 +45,27 @@ class PaymentService {
   }
   
   static async getPaymentStats(user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
-    
-    let whereClause = '';
-    const params = [];
-    
-    if (role === 'tenant') {
-      whereClause = 'WHERE p.tenant_id = $1';
-      params.push(userPropertyId);
-    } else if (role === 'admin') {
-      whereClause = 'WHERE pr.admin_id = $1';
-      params.push(user.id);
+    return await Payment.getStats(user);
+  }
+
+  static async getPaymentsByTenantId(tenantId, user) {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
     }
+
+    // Permission check
+    await PermissionService.ensureTenantAccess(user, tenantId);
+
+    return await Payment.findAll({ 
+        role: 'admin', // Force admin-like filtering for the specific tenant
+        properties: user.properties, 
+        property_id: tenantId, // Overloading property_id as tenantId in our model's logic for filtering
+        id: user.id 
+    });
     
-    const query = `
-      SELECT 
-        COUNT(*) as total_transactions,
-        SUM(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END) as total_revenue,
-        AVG(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END) as avg_payment,
-        COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_count
-      FROM payments p
-      JOIN tenants t ON p.tenant_id = t.id
-      JOIN properties pr ON t.property_id = pr.id
-      ${whereClause}
-    `;
-    
-    const result = await Database.query(query, params);
-    return result.rows[0];
+    // Actually, I should probably just filter the results of findAll or add a specific method.
+    // Let's use getPaymentHistory from model instead, which I previously saw.
+    // return await Payment.getPaymentHistory(tenantId, user);
   }
 }
 

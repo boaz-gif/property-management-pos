@@ -1,12 +1,59 @@
 const Tenant = require('../models/Tenant');
+const Payment = require('../models/Payment');
+const Maintenance = require('../models/Maintenance');
+const PermissionService = require('./PermissionService');
 const Database = require('../utils/database');
 const { TENANT_STATUS, HTTP_STATUS } = require('../utils/constants');
 
 class TenantService {
-  static async getAllTenants(user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
+  /**
+   * Get tenant by user_id (PHASE 3 - Normalized approach)
+   * Security: Used when tenant accesses their own data via /tenants/me
+   * This replaces getTenantByEmail after migration
+   */
+  static async getTenantByUserId(userId) {
+    const tenant = await Tenant.findByUserId(userId);
     
-    const tenants = await Tenant.findAll(role, userProperties, userPropertyId);
+    if (!tenant) {
+      return null;
+    }
+    
+    // Add calculated fields
+    return {
+      ...tenant,
+      payment_status: tenant.total_pending > 0 ? 'overdue' : 'current',
+      occupancy_percentage: tenant.rent > 0 ? 
+        Math.max(0, Math.min(100, (tenant.total_paid / (tenant.total_paid + tenant.total_pending)) * 100)) : 0,
+      has_maintenance_issues: tenant.open_maintenance > 0,
+      days_until_due: this.calculateDaysUntilDue(tenant.rent, tenant.total_pending)
+    };
+  }
+
+  /**
+   * Get tenant by email (DEPRECATED - Phase 3)
+   * Kept for backward compatibility during migration period
+   * Security: Used when tenant accesses their own data via /tenants/me
+   */
+  static async getTenantByEmail(email, user) {
+    const tenant = await Tenant.findByEmail(email);
+    
+    if (!tenant) {
+      return null;
+    }
+    
+    // Add calculated fields
+    return {
+      ...tenant,
+      payment_status: tenant.total_pending > 0 ? 'overdue' : 'current',
+      occupancy_percentage: tenant.rent > 0 ? 
+        Math.max(0, Math.min(100, (tenant.total_paid / (tenant.total_paid + tenant.total_pending)) * 100)) : 0,
+      has_maintenance_issues: tenant.open_maintenance > 0,
+      days_until_due: this.calculateDaysUntilDue(tenant.rent, tenant.total_pending)
+    };
+  }
+
+  static async getAllTenants(user) {
+    const tenants = await Tenant.findAll(user);
     
     // Add calculated fields
     const tenantsWithStats = tenants.map(tenant => ({
@@ -21,9 +68,7 @@ class TenantService {
   }
 
   static async getTenantById(id, user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
-    
-    const tenant = await Tenant.findById(id, role, userProperties, userPropertyId);
+    const tenant = await Tenant.findById(id, user);
     
     if (!tenant) {
       throw new Error('Tenant not found');
@@ -69,10 +114,30 @@ class TenantService {
   
     // Enhanced move_in date validation
     this.validateMoveInDate(tenantData.move_in);
+
+    if (!tenantData.lease_start_date && !tenantData.lease_end_date) {
+      const moveIn = this.parseDate(tenantData.move_in);
+      const moveInStr = isNaN(moveIn.getTime()) ? null : moveIn.toISOString().split('T')[0];
+      if (moveInStr) {
+        tenantData.lease_start_date = moveInStr;
+      }
+
+      const settingsRes = await Database.query(
+        'SELECT default_term_days FROM property_lease_settings WHERE property_id = $1',
+        [tenantData.property_id]
+      );
+      const defaultTermDays = settingsRes.rows[0]?.default_term_days ? parseInt(settingsRes.rows[0].default_term_days, 10) : 365;
+
+      if (moveInStr && Number.isFinite(defaultTermDays) && defaultTermDays > 0) {
+        const end = new Date(moveIn);
+        end.setDate(end.getDate() + defaultTermDays);
+        tenantData.lease_end_date = end.toISOString().split('T')[0];
+      }
+    }
   
     // Validate property access for admins
-    if (role === 'admin' && user.properties && !user.properties.includes(tenantData.property_id)) {
-      throw new Error('Access denied: You cannot add tenants to this property');
+    if (tenantData.property_id) {
+      await PermissionService.ensurePropertyAccess(user, tenantData.property_id);
     }
   
     const tenant = await Tenant.create(tenantData, user.id);
@@ -200,11 +265,14 @@ class TenantService {
   }
 
   static async updateTenant(id, tenantData, user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
+    const { role } = user;
     
     // Only super_admin, admin, and the tenant themselves can update
-    if (role === 'tenant' && parseInt(id) !== userPropertyId) {
-      throw new Error('Access denied: You can only update your own information');
+    // Access control
+    if (role === 'tenant') {
+      await PermissionService.ensureTenantAccess(user, id);
+    } else {
+      await PermissionService.ensureTenantAccess(user, id);
     }
     
     // Validate email format if provided
@@ -238,33 +306,27 @@ class TenantService {
     }
     */
 
-    // Validate property access for admins
-    if (role === 'admin' && tenantData.property_id && user.properties && !user.properties.includes(tenantData.property_id)) {
-      throw new Error('Access denied: You cannot move tenants to this property');
-    }
-    
-    const tenant = await Tenant.update(id, tenantData, role, userProperties, userPropertyId);
+    const tenant = await Tenant.update(id, tenantData, user);
     
     return tenant;
   }
 
   static async deleteTenant(id, user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
+    const { role } = user;
     
     // Only super_admin and admin can delete tenants
     if (role === 'tenant') {
       throw new Error('Access denied: Tenants cannot delete tenant records');
     }
     
-    await Tenant.delete(id, role, userProperties, userPropertyId);
+    await PermissionService.ensureTenantAccess(user, id);
+    await Tenant.delete(id, user);
     
     return { message: 'Tenant deleted successfully' };
   }
 
   static async getTenantStats(user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
-    
-    const stats = await Tenant.getTenantStats(role, userProperties, userPropertyId);
+    const stats = await Tenant.getTenantStats(user);
     
     return {
       total_tenants: parseInt(stats.total_tenants) || 0,
@@ -447,64 +509,25 @@ class TenantService {
   }
 
   static async getTenantPaymentHistory(tenantId, user) {
-    const { role, property_id: userPropertyId } = user;
-    
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
     
-    const query = `
-      SELECT pm.*, 
-             CASE 
-               WHEN pm.status = 'completed' THEN 'Paid'
-               WHEN pm.status = 'pending' THEN 'Pending'
-               ELSE pm.status
-             END as status_display
-      FROM payments pm
-      WHERE pm.tenant_id = $1
-      ORDER BY pm.date DESC
-      LIMIT 12
-    `;
-    
-    const result = await Database.query(query, [tenantId]);
-    return result.rows;
+    return await Payment.getPaymentHistory(tenantId, user);
   }
 
   static async getTenantMaintenanceHistory(tenantId, user) {
-    const { role, property_id: userPropertyId } = user;
-
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== userPropertyId) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
-    const query = `
-      SELECT m.*,
-             CASE
-               WHEN m.status = 'open' THEN 'Open'
-               WHEN m.status = 'in-progress' THEN 'In Progress'
-               WHEN m.status = 'completed' THEN 'Completed'
-               ELSE m.status
-             END as status_display
-      FROM maintenance m
-      WHERE m.tenant_id = $1
-      ORDER BY m.date DESC
-      LIMIT 10
-    `;
-
-    const result = await Database.query(query, [tenantId]);
-    return result.rows;
+    return await Maintenance.findByTenantId(tenantId);
   }
 
   // Enhanced payment processing
   static async processPayment(tenantId, amount, method, type, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     // Create payment record using Payment model
     const Payment = require('../models/Payment');
@@ -516,24 +539,38 @@ class TenantService {
       createdBy: user.id
     });
 
-    // Update tenant balance
-    await this.adjustTenantBalance(tenantId, amount, 'payment', user);
+    // Update tenant balance - REMOVED: Managed by DB Trigger
+    // await this.adjustTenantBalance(tenantId, amount, 'payment', user);
 
     // Send payment confirmation notification
     const NotificationService = require('./notificationService');
-    await NotificationService.sendPaymentConfirmation(tenantId, amount, method, user);
+    const tenantResult = await Database.query('SELECT user_id FROM tenants WHERE id = $1', [tenantId]);
+    const tenantUserId = tenantResult.rows[0]?.user_id;
+    
+    if (tenantUserId) {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
+      await NotificationService.createNotification({
+        user_id: tenantUserId,
+        tenant_id: tenantId,
+        title: 'Payment Received',
+        message: `Your payment of $${amount} for ${month}/${year} has been received.`,
+        type: 'payment_confirmation',
+        data: { payment_id: payment.id, amount, month, year }
+      });
+    }
 
     return payment;
   }
 
   // Enhanced balance adjustment (admin approved)
   static async adjustTenantBalance(tenantId, amount, type, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Check permissions for tenant
-    if (role === 'tenant' && parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     // Validate amount
     if (amount <= 0) {
@@ -562,8 +599,8 @@ class TenantService {
     // Calculate new balance
     switch (type) {
       case 'payment':
-        newBalance = currentBalance - amount;
-        break;
+        // No longer handled in backend - DB trigger manages balance reduction
+        return { message: 'Payment recorded. Balance will be updated by system.' };
       case 'charge':
         newBalance = currentBalance + amount;
         break;
@@ -574,10 +611,12 @@ class TenantService {
         throw new Error(`Unsupported adjustment type: ${type}`);
     }
 
-    // Business rule validation
+    // Business rule validation - Payment case removed as it's handled by DB
+    /*
     if (type === 'payment' && newBalance < 0) {
       throw new Error(`Payment amount (${amount}) exceeds current balance (${currentBalance}).`);
     }
+    */
 
     // Update tenant balance
     const query = `
@@ -618,12 +657,13 @@ class TenantService {
 
   // Enhanced balance request (for tenants to request adjustments)
   static async requestBalanceAdjustment(tenantId, amount, reason, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Only tenants can request balance adjustments
-    if (role !== 'tenant' || parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied: Only tenants can request balance adjustments');
+    if (role !== 'tenant') {
+        throw new Error('Access denied: Only tenants can request balance adjustments');
     }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     // Validate input
     if (!amount || !reason) {
@@ -660,12 +700,10 @@ class TenantService {
 
   // Enhanced dispute management
   static async createDispute(tenantId, chargeId, reason, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     // Use Dispute model
     const Dispute = require('../models/Dispute');
@@ -690,12 +728,10 @@ class TenantService {
 
   // Enhanced notification access
   static async getNotifications(tenantId, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     const NotificationService = require('./notificationService');
     return await NotificationService.getNotificationsByTenantId(tenantId, user);
@@ -703,12 +739,10 @@ class TenantService {
 
   // Enhanced lease access
   static async getLeaseDetails(tenantId, user) {
-    const { role, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // Check access permissions
-    if (role === 'tenant' && parseInt(tenantId) !== parseInt(userPropertyId)) {
-      throw new Error('Access denied');
-    }
+    await PermissionService.ensureTenantAccess(user, tenantId);
 
     const Lease = require('../models/Lease');
     return await Lease.getLeaseByTenantId(tenantId, user);
@@ -716,10 +750,13 @@ class TenantService {
 
   // Enhanced financial analytics (basic)
   static async getFinancialSummary(user) {
-    const { role, properties: userProperties, property_id: userPropertyId } = user;
+    const { role } = user;
 
     // For tenants, only their own
     if (role === 'tenant') {
+      const tenant = await this.getTenantByUserId(user.id);
+      if (!tenant) return { current_balance: 0, monthly_rent: 0, total_payments: 0, total_paid: 0 };
+      
       const query = `
         SELECT
           t.balance as current_balance,
@@ -732,13 +769,20 @@ class TenantService {
         GROUP BY t.id, t.balance, t.rent
       `;
 
-      const result = await Database.query(query, [userPropertyId]);
+      const result = await Database.query(query, [tenant.id]);
       return result.rows[0] || { current_balance: 0, monthly_rent: 0, total_payments: 0, total_paid: 0 };
     }
 
     // For admins, property-wide summary
     // This is a simplified version - real analytics would be more comprehensive
     return { message: 'Admin financial summary would be implemented here' };
+  }
+
+  /**
+   * Update lease information for a tenant
+   */
+  static async updateTenantLease(tenantId, leaseData) {
+    return await Tenant.updateLeaseInfo(tenantId, leaseData);
   }
 }
 

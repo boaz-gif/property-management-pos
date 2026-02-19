@@ -1,22 +1,27 @@
 const Database = require('../utils/database');
 const bcrypt = require('bcryptjs');
 const { USER_ROLES } = require('../utils/constants');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
 
-class User {
+class User extends BaseSoftDeleteModel {
+  constructor() {
+    super('users', Database);
+  }
+
   static async findByEmail(email) {
-    const query = 'SELECT * FROM users WHERE email = $1';
+    const query = 'SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL';
     const result = await Database.query(query, [email]);
     return result.rows[0];
   }
 
   static async findById(id) {
-    const query = 'SELECT id, name, email, role, properties, property_id, unit, status, created_at, updated_at FROM users WHERE id = $1';
+    const query = 'SELECT id, name, email, role, properties, property_id, unit, status, created_at, updated_at FROM users WHERE id = $1 AND deleted_at IS NULL';
     const result = await Database.query(query, [id]);
     return result.rows[0];
   }
 
   static async findByIdWithPassword(id) {
-    const query = 'SELECT * FROM users WHERE id = $1';
+    const query = 'SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL';
     const result = await Database.query(query, [id]);
     return result.rows[0];
   }
@@ -56,13 +61,22 @@ class User {
     await Database.query(query, [hashedPassword, id]);
   }
 
-  static async getAll(role) {
+  static async getAll(role, user, includeArchived = false) {
     let query = 'SELECT id, name, email, role, properties, property_id, unit, status, created_at, updated_at FROM users';
     let values = [];
+    let whereClause = [];
+    
+    if (!includeArchived) {
+      whereClause.push('deleted_at IS NULL');
+    }
     
     if (role) {
-      query += ' WHERE role = $1';
+      whereClause.push(`role = $${values.length + 1}`);
       values.push(role);
+    }
+    
+    if (whereClause.length > 0) {
+      query += ' WHERE ' + whereClause.join(' AND ');
     }
     
     query += ' ORDER BY created_at DESC';
@@ -77,7 +91,7 @@ class User {
     const query = `
       UPDATE users 
       SET name = $1, email = $2, role = $3, properties = $4, property_id = $5, unit = $6, status = $7, updated_at = NOW()
-      WHERE id = $8
+      WHERE id = $8 AND deleted_at IS NULL
       RETURNING id, name, email, role, properties, property_id, unit, status, created_at, updated_at
     `;
     
@@ -87,8 +101,56 @@ class User {
   }
 
   static async delete(id) {
-    const query = 'DELETE FROM users WHERE id = $1';
+    // Deprecated - use archive() instead
+    // Keeping for backward compatibility
+    const query = 'UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND deleted_at IS NULL';
     await Database.query(query, [id]);
+  }
+
+  static async archive(id, user) {
+    const query = `
+      UPDATE users 
+      SET deleted_at = CURRENT_TIMESTAMP, deleted_by = $1 
+      WHERE id = $2 AND deleted_at IS NULL 
+      RETURNING id, name, email, role, properties, property_id, unit, status, created_at, updated_at
+    `;
+    const result = await Database.query(query, [user.id, id]);
+    return result.rows[0];
+  }
+
+  static async restore(id, user) {
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      throw new Error('Only admins can restore archived users');
+    }
+    
+    const query = `
+      UPDATE users 
+      SET deleted_at = NULL, deleted_by = NULL 
+      WHERE id = $1 AND deleted_at IS NOT NULL 
+      RETURNING id, name, email, role, properties, property_id, unit, status, created_at, updated_at
+    `;
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('User not found or not archived');
+    }
+    
+    return result.rows[0];
+  }
+
+  static async permanentDelete(id, user) {
+    if (user.role !== 'super_admin') {
+      throw new Error('Only super admins can permanently delete records');
+    }
+    
+    const query = 'DELETE FROM users WHERE id = $1 RETURNING id, name, email, role';
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('User not found');
+    }
+    
+    return result.rows[0];
   }
 }
 

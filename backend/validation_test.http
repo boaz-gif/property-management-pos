@@ -1,0 +1,53 @@
+### 1. Register Super Admin
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Super Admin",
+  "email": "superadmin@property.com",
+  "password": "admin123",
+  "role": "super_admin"
+}
+
+### 2. Register Admin
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Property Admin",
+  "email": "admin@property.com",
+  "password": "admin123",
+  "role": "admin",
+  "properties": [1, 2]
+}
+
+### 3. Register Tenant
+POST http://localhost:5001/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Tenant",
+  "email": "tenant@example.com",
+  "password": "tenant123",
+  "role": "tenant",
+  "property_id": 1,
+  "unit": "A101"
+}
+
+### 4. Login Tenant
+POST http://localhost:5001/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "tenant@example.com",
+  "password": "tenant123"
+}
+
+### 5. Invalid Login
+POST http://localhost:5001/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "tenant@example.com",
+  "password": "wrongpassword"
+}

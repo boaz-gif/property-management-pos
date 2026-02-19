@@ -4,6 +4,8 @@ const Database = require('../src/utils/database');
 
 jest.mock('../src/utils/database');
 
+const NotificationService = require('../src/services/notificationService');
+
 describe('Notification API Endpoints', () => {
   let userToken = 'mock_user_token';
 
@@ -36,6 +38,19 @@ describe('Notification API Endpoints', () => {
         .set('Authorization', `Bearer ${userToken}`);
 
       // expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe('POST /api/notifications/payment-reminder', () => {
+    it('should send payment reminder', async () => {
+      Database.query.mockResolvedValueOnce({
+        rows: [{ email: 'tenant@example.com' }],
+        rowCount: 1
+      });
+
+      const result = await NotificationService.sendPaymentReminder(1);
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Reminder sent');
     });
   });
 });

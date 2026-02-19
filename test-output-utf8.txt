@@ -1,0 +1,126 @@
+﻿node.exe : [baseline-b
+rowser-mapping] The 
+data in this module 
+is over two months 
+old.  To ensure 
+accurate Baseline 
+data, please update: 
+`npm i baseline-browse
+r-mapping@latest -D`
+At C:\Program Files\no
+dejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([baseline-   
+ brows...ping@late    
+st -D`:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  console.log
+    reportWebVitals: called { enabled: false, fn: true }
+
+      at reportWebVitals (src/reportWebVitals.js:5:11)
+
+  console.log
+    reportWebVitals: called { enabled: true, fn: true }
+
+      at reportWebVitals (src/reportWebVitals.js:5:11)
+
+(node:8128) [DEP0040] 
+DeprecationWarning: 
+The `punycode` module 
+is deprecated. Please 
+use a userland 
+alternative instead.
+(Use `node 
+--trace-deprecation 
+...` to show where 
+the warning was 
+created)
+FAIL src/__tests__/rep
+ortWebVitals.test.js
+  reportWebVitals
+    ΓêÜ does nothing 
+when diagnostics 
+disabled (46 ms)
+    ├ù reports 
+metrics to callback 
+and window sink when 
+enabled (110 ms)
+
+  ΓùÅ reportWebVitals 
+ΓÇ║ reports metrics 
+to callback and 
+window sink when 
+enabled
+
+    expect(jest.fn()).
+toHaveBeenCalledTimes(
+expected)
+
+    Expected number 
+of calls: 5
+    Received number 
+of calls: 0
+
+    [0m [90m 45 
+|[39m     
+[36mawait[39m 
+[36mnew[39m [33mPro
+mise[39m(resolve 
+[33m=>[39m setTimeou
+t(resolve[33m,[39m 
+[35m100[39m))[33m;[
+39m
+     [90m 46 |[39m
+    [31m[1m>[22m[3
+9m[90m 47 |[39m     
+expect(onPerfEntry)[3
+3m.[39mtoHaveBeenCall
+edTimes([35m5[39m)[
+33m;[39m
+     [90m    |[39m  
+                      
+ [31m[1m^[22m[39m
+     [90m 48 |[39m  
+   expect(window[33m.
+[39m__PERF_WEB_VITALS
+__)[33m.[39mtoHaveLe
+ngth([35m5[39m)[33m
+;[39m
+     [90m 49 |[39m  
+   expect(window[33m.
+[39m__PERF_WEB_VITALS
+__[[35m0[39m])[33m.
+[39mtoEqual({ 
+name[33m:[39m [32m'
+CLS'[39m[33m,[39m 
+value[33m:[39m 
+[35m1[39m 
+})[33m;[39m
+     [90m 50 |[39m  
+ })[33m;[39m[0m
+
+      at 
+Object.<anonymous> (sr
+c/__tests__/reportWebV
+itals.test.js:47:25)
+
+Test Suites: 1 
+failed, 1 total
+Tests:       1 
+failed, 1 passed, 2 
+total
+Snapshots:   0 total
+Time:        2.718 s, 
+estimated 3 s
+Ran all test suites 
+matching 
+/reportWebVitals/i.

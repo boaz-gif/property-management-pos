@@ -1,6 +1,11 @@
 const Database = require('../utils/database');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
 
-class Payment {
+class Payment extends BaseSoftDeleteModel {
+  constructor() {
+    super('payments', Database);
+  }
+
   static async create(paymentData) {
     const { tenantId, amount, method, type, status, createdBy } = paymentData;
 
@@ -40,7 +45,7 @@ class Payment {
     const query = `
       UPDATE payments
       SET status = $2, updated_at = NOW()
-      WHERE id = $1
+      WHERE id = $1 AND deleted_at IS NULL
       RETURNING *
     `;
 
@@ -66,7 +71,7 @@ class Payment {
                ELSE pm.status
              END as status_display
       FROM payments pm
-      WHERE pm.tenant_id = $1
+      WHERE pm.tenant_id = $1 AND pm.deleted_at IS NULL
       ORDER BY pm.date DESC, pm.created_at DESC
       LIMIT 20
     `;
@@ -79,8 +84,8 @@ class Payment {
     const query = `
       SELECT pm.*, t.name as tenant_name
       FROM payments pm
-      JOIN tenants t ON pm.tenant_id = t.id
-      WHERE pm.id = $1
+      JOIN tenants t ON pm.tenant_id = t.id AND t.deleted_at IS NULL
+      WHERE pm.id = $1 AND pm.deleted_at IS NULL
     `;
 
     const result = await Database.query(query, [paymentId]);
@@ -97,6 +102,111 @@ class Payment {
     }
 
     return payment;
+  }
+
+  static async archive(id, user) {
+    const query = `
+      UPDATE payments 
+      SET deleted_at = CURRENT_TIMESTAMP, deleted_by = $1 
+      WHERE id = $2 AND deleted_at IS NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [user.id, id]);
+    return result.rows[0];
+  }
+
+  static async restore(id, user) {
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      throw new Error('Only admins can restore archived payments');
+    }
+    
+    const query = `
+      UPDATE payments 
+      SET deleted_at = NULL, deleted_by = NULL 
+      WHERE id = $1 AND deleted_at IS NOT NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Payment not found or not archived');
+    }
+    
+    return result.rows[0];
+  }
+
+  static async permanentDelete(id, user) {
+    if (user.role !== 'super_admin') {
+      throw new Error('Only super admins can permanently delete records');
+    }
+    
+    const query = 'DELETE FROM payments WHERE id = $1 RETURNING *';
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Payment not found');
+    }
+    
+    return result.rows[0];
+  }
+
+  static async findAll(user) {
+    const { role, properties, id: userId, email: userEmail, property_id: userPropertyId } = user;
+    
+    let query = `
+      SELECT p.*, t.name as tenant_name, t.email as tenant_email, pr.name as property_name
+      FROM payments p
+      JOIN tenants t ON p.tenant_id = t.id
+      JOIN properties pr ON t.property_id = pr.id
+      WHERE p.deleted_at IS NULL
+    `;
+    
+    const params = [];
+    let paramCount = 1;
+    
+    if (role === 'tenant') {
+      query += ` AND p.tenant_id = $${paramCount++}`;
+      params.push(userPropertyId); // userPropertyId stores tenant record ID for tenants
+    } else if (role === 'admin' && properties && properties.length > 0) {
+      query += ` AND t.property_id = ANY($${paramCount++})`;
+      params.push(properties);
+    }
+    
+    query += ` ORDER BY p.date DESC, p.created_at DESC`;
+    
+    const result = await Database.query(query, params);
+    return result.rows;
+  }
+
+  static async getStats(user) {
+    const { role, properties, property_id: userPropertyId } = user;
+    
+    let whereClause = 'WHERE p.deleted_at IS NULL';
+    const params = [];
+    let paramCount = 1;
+    
+    if (role === 'tenant') {
+      whereClause += ` AND p.tenant_id = $${paramCount++}`;
+      params.push(userPropertyId);
+    } else if (role === 'admin' && properties && properties.length > 0) {
+      whereClause += ` AND t.property_id = ANY($${paramCount++})`;
+      params.push(properties);
+    }
+    
+    const query = `
+      SELECT 
+        COUNT(*) as total_transactions,
+        SUM(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END) as total_revenue,
+        AVG(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END) as avg_payment,
+        COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_count
+      FROM payments p
+      JOIN tenants t ON p.tenant_id = t.id
+      JOIN properties pr ON t.property_id = pr.id
+      ${whereClause}
+    `;
+    
+    const result = await Database.query(query, params);
+    return result.rows[0];
   }
 }
 

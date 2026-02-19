@@ -1,28 +1,70 @@
 const Database = require('../utils/database');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
+const Conversation = require('./Conversation');
 
-class Document {
+class Document extends BaseSoftDeleteModel {
+  constructor() {
+    super('documents', Database);
+  }
+
   static async create(docData) {
-    const { userId, name, type, url, size, mimeType } = docData;
+    const { 
+      userId, 
+      name, 
+      type, 
+      filePath, // using file_path to match DB
+      size, 
+      mimeType, 
+      description,
+      entityType,
+      entityId,
+      category = 'other',
+      isEncrypted = false,
+      encryptionIv = null,
+      encryptionAuthTag = null,
+      encryptionKeyId = null,
+      encryptionAlgorithm = null
+    } = docData;
 
     const query = `
-      INSERT INTO documents (user_id, name, type, url, created_at)
-      VALUES ($1, $2, $3, $4, NOW())
+      INSERT INTO documents (
+        user_id, name, type, file_path, file_size, mime_type, description,
+        entity_type, entity_id, category, is_encrypted, encryption_iv, encryption_auth_tag, encryption_key_id, encryption_algorithm,
+        created_at, uploaded_by
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), $15)
       RETURNING *
     `;
 
-    // Note: Schema might need updates if we want to store size/mimeType explicitly
-    // For now mapping to existing schema columns based on description
-    // Assuming 'type' in schema refers to document category (lease, receipt) or file type?
-    // Let's assume it's the category/type provided by user or inferred
-    
-    const values = [userId, name, type || 'general', url];
+    const values = [
+      userId, 
+      name, 
+      type || 'general', 
+      filePath, 
+      size, 
+      mimeType, 
+      description,
+      entityType,
+      entityId,
+      category,
+      Boolean(isEncrypted),
+      encryptionIv,
+      encryptionAuthTag,
+      encryptionKeyId,
+      encryptionAlgorithm,
+      userId
+    ];
+
     const result = await Database.query(query, values);
     return result.rows[0];
   }
 
-  static async findById(id, userId, userRole) {
+  static async findById(id, userId, userRole, userProperties) {
     const query = `
-      SELECT * FROM documents WHERE id = $1
+      SELECT d.*, u.name as uploader_name
+      FROM documents d
+      LEFT JOIN users u ON d.uploaded_by = u.id
+      WHERE d.id = $1 AND d.deleted_at IS NULL
     `;
     const result = await Database.query(query, [id]);
     const doc = result.rows[0];
@@ -30,71 +72,140 @@ class Document {
     if (!doc) return null;
 
     // Access control
-    if (userRole === 'tenant' && doc.user_id !== userId) {
-      // Tenants can only see their own documents
-      // UNLESS it's a shared document? For now strict ownership
-      return null; 
-    }
-    
-    // Admins might need access to tenant documents? 
-    // If so, we'd need to check if tenant belongs to admin's property
-    // For simplicity in this iteration:
-    if (userRole === 'admin') {
-        // Check if document owner is a tenant of this admin
-        // This requires a join or separate check. 
-        // Let's allow admins to see documents if they are the owner OR if they manage the user
-        // For now, let's return the doc and let Service handle complex permission logic if needed
-        // or add a basic check here:
-        if (doc.user_id !== userId) {
-             // Check if doc owner is a tenant of a property managed by admin
-             const accessCheck = await Database.query(`
-                SELECT 1 
-                FROM tenants t
-                JOIN properties p ON t.property_id = p.id
-                WHERE t.id = $1 AND p.admin_id = $2
-             `, [doc.user_id, userId]);
-             
-             if (accessCheck.rows.length === 0) {
-                 // Maybe doc owner is not a tenant (e.g. another admin?), then deny
-                 return null;
-             }
-        }
-    }
+    if (userRole === 'super_admin') return doc;
+
+    // Check ownership
+    if (doc.user_id === userId || doc.uploaded_by === userId) return doc;
+
+    // Check context access
+    const hasAccess = await this.checkAccess(doc, userId, userRole, userProperties);
+    if (!hasAccess) return null;
 
     return doc;
   }
 
-  static async findAll(userId, userRole) {
-    let query = `SELECT * FROM documents`;
-    let params = [];
-
-    if (userRole === 'tenant') {
-      query += ` WHERE user_id = $1`;
-      params.push(userId);
-    } else if (userRole === 'admin') {
-      // Admin sees their own docs AND docs of their tenants
-      query += ` 
-        WHERE user_id = $1 
-        OR user_id IN (
-          SELECT t.id 
-          FROM tenants t 
-          JOIN properties p ON t.property_id = p.id 
-          WHERE p.admin_id = $1
-        )
-      `;
-      params.push(userId);
+  // Helper to check contextual access
+  static async checkAccess(doc, userId, userRole, userProperties) {
+    // 1. Property-Linked Documents
+    if (doc.entity_type === 'property') {
+      // Admin owns the property?
+      if (userRole === 'admin' && userProperties && userProperties.includes(doc.entity_id)) {
+        return true;
+      }
+      // Tenant lives in the property? (Needs expensive check or rely on caller)
+      // For now, restrictive: only admins see property docs unless public
     }
 
-    query += ` ORDER BY created_at DESC`;
+    // 2. Tenant-Linked Documents
+    if (doc.entity_type === 'tenant') {
+      // Is this the tenant?
+      // Need to resolve tenant_id from user_id to be sure, or pass it in.
+      // Assuming caller handles basic "is this my doc" logic before.
+      
+      // Admin owns the property the tenant belongs to?
+      if (userRole === 'admin') {
+         const tenantCheck = await Database.query(
+             'SELECT property_id FROM tenants WHERE id = $1', [doc.entity_id]
+         );
+         if (tenantCheck.rows.length > 0 && userProperties.includes(tenantCheck.rows[0].property_id)) {
+             return true;
+         }
+      }
+    }
+    
+    // 3. Maintenance/Payment (Indirect link to Property)
+    // ... logic would go here
+
+    // 4. Conversation attachments
+    if (doc.entity_type === 'conversation') {
+      const isParticipant = await Conversation.isParticipant(doc.entity_id, userId);
+      if (isParticipant) return true;
+    }
+
+    return false;
+  }
+
+  static async findAll(filters) {
+    const { 
+      userId, 
+      userRole, 
+      userProperties,
+      entityType, 
+      entityId,
+      category
+    } = filters;
+
+    let query = `
+      SELECT d.*, u.name as uploader_name 
+      FROM documents d
+      LEFT JOIN users u ON d.uploaded_by = u.id
+      WHERE d.deleted_at IS NULL
+    `;
+    let params = [];
+    let paramCount = 1;
+
+    // Context Filtering
+    if (entityType && entityId) {
+      query += ` AND d.entity_type = $${paramCount} AND d.entity_id = $${paramCount + 1}`;
+      params.push(entityType, entityId);
+      paramCount += 2;
+    }
+
+    if (category) {
+      query += ` AND d.category = $${paramCount}`;
+      params.push(category);
+      paramCount++;
+    }
+
+    // Security Filtering
+    if (entityType === 'conversation' && entityId) {
+      if (userRole !== 'super_admin') {
+        const isParticipant = await Conversation.isParticipant(parseInt(entityId), userId);
+        if (!isParticipant) {
+          return [];
+        }
+      }
+      query += ` ORDER BY d.created_at DESC`;
+      const result = await Database.query(query, params);
+      return result.rows;
+    }
+
+    if (userRole === 'tenant') {
+       // Tenants see: 
+       // 1. Docs they own/uploaded
+       // 2. Docs linked to them explicitly
+       // 3. Docs linked to their Property that are NOT sensitive (TODO: Add 'is_public' flag later?)
+       query += ` AND (d.user_id = $${paramCount} OR (d.entity_type = 'tenant' AND d.entity_id = (SELECT id FROM tenants WHERE user_id = $${paramCount} LIMIT 1)))`;
+       params.push(userId);
+       paramCount++;
+    } else if (userRole === 'admin') {
+       // Admins see:
+       // 1. Docs they uploaded
+       // 2. Docs linked to their properties
+       // 3. Docs linked to tenants in their properties
+       if (userProperties && userProperties.length > 0) {
+         query += ` 
+           AND (
+             d.uploaded_by = $${paramCount}
+             OR (d.entity_type = 'property' AND d.entity_id = ANY($${paramCount+1}))
+             OR (d.entity_type = 'tenant' AND d.entity_id IN (SELECT id FROM tenants WHERE property_id = ANY($${paramCount+1})))
+             OR (d.entity_type = 'maintenance' AND d.entity_id IN (SELECT id FROM maintenance WHERE property_id = ANY($${paramCount+1})))
+             OR (d.entity_type = 'payment' AND d.entity_id IN (SELECT id FROM payments WHERE property_id = ANY($${paramCount+1})))
+           )
+         `;
+         params.push(userId, userProperties);
+         paramCount += 2;
+       } else {
+         query += ` AND d.uploaded_by = $${paramCount}`;
+         params.push(userId);
+         paramCount++;
+       }
+    }
+
+    query += ` ORDER BY d.created_at DESC`;
 
     const result = await Database.query(query, params);
     return result.rows;
-  }
-
-  static async delete(id) {
-    const query = `DELETE FROM documents WHERE id = $1 RETURNING *`;
-    const result = await Database.query(query, [id]);
-    return result.rows[0];
   }
 }
 

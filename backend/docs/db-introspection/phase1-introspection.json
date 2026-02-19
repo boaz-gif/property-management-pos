@@ -1,0 +1,5749 @@
+{
+  "generated_at": "2026-02-02T22:27:35.898Z",
+  "schema": {
+    "tables": [
+      {
+        "table_name": "tenants",
+        "schemaname": "public",
+        "size": "352 kB",
+        "size_bytes": 360448,
+        "row_count": 18,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenants_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "email",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "unit",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "rent",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "move_in",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "balance",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0.00",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "lease_start_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "lease_end_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "lease_status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "tenants_email_key": [
+            "email"
+          ],
+          "unique_tenant_per_user": [
+            "user_id"
+          ],
+          "unique_user_tenant": [
+            "user_id"
+          ]
+        }
+      },
+      {
+        "table_name": "maintenance",
+        "schemaname": "public",
+        "size": "208 kB",
+        "size_bytes": 212992,
+        "row_count": 6,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('maintenance_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "unit",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "issue",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "priority",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'medium'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'open'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "assigned_to",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "completed_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": "'Maintenance Request'::character varying",
+            "character_maximum_length": 255,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "payments",
+        "schemaname": "public",
+        "size": "200 kB",
+        "size_bytes": 204800,
+        "row_count": 5,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('payments_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "amount",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "method",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'pending'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "users",
+        "schemaname": "public",
+        "size": "192 kB",
+        "size_bytes": 196608,
+        "row_count": 52,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('users_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "email",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "password",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "role",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "properties",
+            "data_type": "ARRAY",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "unit",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "users_email_key": [
+            "email"
+          ]
+        }
+      },
+      {
+        "table_name": "notifications",
+        "schemaname": "public",
+        "size": "152 kB",
+        "size_bytes": 155648,
+        "row_count": 27,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('notifications_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "message",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "is_read",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "data",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "properties",
+        "schemaname": "public",
+        "size": "144 kB",
+        "size_bytes": 147456,
+        "row_count": 5,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('properties_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "address",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "units",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "rent",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "admin_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "images",
+            "data_type": "jsonb",
+            "is_nullable": "NO",
+            "column_default": "'[]'::jsonb",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "documents",
+        "schemaname": "public",
+        "size": "144 kB",
+        "size_bytes": 147456,
+        "row_count": 6,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('documents_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "file_path",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 500,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "file_size",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "mime_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "uploaded_by",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "entity_type",
+            "data_type": "USER-DEFINED",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "entity_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "category",
+            "data_type": "USER-DEFINED",
+            "is_nullable": "YES",
+            "column_default": "'other'::document_category",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "audit_logs",
+        "schemaname": "public",
+        "size": "128 kB",
+        "size_bytes": 131072,
+        "row_count": 36,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('audit_logs_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "user_email",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "user_role",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "action",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "resource_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "resource_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "old_values",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "new_values",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "ip_address",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "user_agent",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'success'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "error_message",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "admin_dashboard_metrics",
+        "schemaname": "public",
+        "size": "104 kB",
+        "size_bytes": 106496,
+        "row_count": 10,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('admin_dashboard_metrics_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "admin_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "metric_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "total_properties",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "total_units",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "occupied_units",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "vacant_units",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "occupancy_rate",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "monthly_revenue",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "collected_revenue",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "pending_revenue",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "collection_rate",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "total_expenses",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "net_income",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "active_maintenance_requests",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "overdue_maintenance_requests",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "avg_maintenance_resolution_hours",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "total_tenants",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "new_tenants_this_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          },
+          {
+            "column_name": "churned_tenants_this_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 20
+          },
+          {
+            "column_name": "leases_expiring_30_days",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 21
+          },
+          {
+            "column_name": "leases_expiring_60_days",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 22
+          },
+          {
+            "column_name": "late_payments_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 23
+          },
+          {
+            "column_name": "urgent_maintenance_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 24
+          },
+          {
+            "column_name": "compliance_issues_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 25
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 26
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "admin_dashboard_metrics_admin_id_metric_date_key": [
+            "admin_id",
+            "metric_date"
+          ]
+        }
+      },
+      {
+        "table_name": "property_units",
+        "schemaname": "public",
+        "size": "72 kB",
+        "size_bytes": 73728,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('property_units_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "unit_number",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "floor",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "bedrooms",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "bathrooms",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "square_feet",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "unit_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "amenities",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'vacant'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "condition",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "base_rent",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "market_rent",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "deposit_amount",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "current_tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "occupied_since",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "last_vacated",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "days_vacant",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "listed",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          },
+          {
+            "column_name": "listed_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 20
+          },
+          {
+            "column_name": "listing_platforms",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 21
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 22
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 23
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 24
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 25
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "property_units_property_id_unit_number_key": [
+            "property_id",
+            "unit_number"
+          ]
+        }
+      },
+      {
+        "table_name": "token_blacklist",
+        "schemaname": "public",
+        "size": "64 kB",
+        "size_bytes": 65536,
+        "row_count": 24,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('token_blacklist_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "token",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 500,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "user_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "blacklisted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "expires_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "token_blacklist_token_key": [
+            "token"
+          ]
+        }
+      },
+      {
+        "table_name": "expense_categories",
+        "schemaname": "public",
+        "size": "64 kB",
+        "size_bytes": 65536,
+        "row_count": 8,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('expense_categories_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "category_name",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "parent_category",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "is_capital_expense",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "tax_deductible",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "budget_required",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "standard_subcategories",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "expense_categories_category_name_key": [
+            "category_name"
+          ]
+        }
+      },
+      {
+        "table_name": "property_expenses",
+        "schemaname": "public",
+        "size": "64 kB",
+        "size_bytes": 65536,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('property_expenses_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "expense_category",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "subcategory",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "amount",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "expense_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "vendor_name",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "vendor_contact",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "payment_method",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "payment_status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'pending'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "paid_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "receipt_url",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 500,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "invoice_number",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "is_recurring",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "is_capital_expense",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "recurrence_pattern",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "budget_category",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "budget_amount",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          },
+          {
+            "column_name": "variance_amount",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 20
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 21
+          },
+          {
+            "column_name": "recorded_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 22
+          },
+          {
+            "column_name": "approved_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 23
+          },
+          {
+            "column_name": "approved_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 24
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 25
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 26
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 27
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "lease_expiration_reminders",
+        "schemaname": "public",
+        "size": "56 kB",
+        "size_bytes": 57344,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('lease_expiration_reminders_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "reminder_type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "sent_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "NO",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "sent_to_email",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "acknowledged",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "acknowledged_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "lease_expiration_reminders_tenant_id_reminder_type_key": [
+            "tenant_id",
+            "reminder_type"
+          ]
+        }
+      },
+      {
+        "table_name": "property_metrics",
+        "schemaname": "public",
+        "size": "48 kB",
+        "size_bytes": 49152,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('property_metrics_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "metric_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "total_units",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "occupied_units",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "occupancy_rate",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "avg_days_to_fill_vacancy",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "revenue",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "collected",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "collection_rate",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "expenses",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "net_operating_income",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "maintenance_requests",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "maintenance_resolved",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "maintenance_cost",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "avg_resolution_time_hours",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "avg_tenant_satisfaction",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "renewal_rate",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "property_metrics_property_id_metric_date_key": [
+            "property_id",
+            "metric_date"
+          ]
+        }
+      },
+      {
+        "table_name": "admin_action_items",
+        "schemaname": "public",
+        "size": "48 kB",
+        "size_bytes": 49152,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('admin_action_items_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "admin_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "item_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "priority",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 20,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'pending'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "due_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "completed_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "dismissed_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "dismissal_reason",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "expense_budgets",
+        "schemaname": "public",
+        "size": "40 kB",
+        "size_bytes": 40960,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('expense_budgets_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "budget_year",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "budget_period",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 20,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "budget_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "maintenance_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "utilities_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "insurance_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "tax_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "management_fee_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "marketing_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "repairs_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "other_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "total_budget",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "budget_status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "approved_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "approved_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 20
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "recurring_expenses",
+        "schemaname": "public",
+        "size": "40 kB",
+        "size_bytes": 40960,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('recurring_expenses_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "expense_category",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "subcategory",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "description",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "amount",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "recurrence_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 20,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "recurrence_interval",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "1",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "day_of_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "month_of_year",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "start_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "end_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "next_due_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "last_generated_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "vendor_name",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "vendor_contact",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "auto_generate",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          },
+          {
+            "column_name": "created_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 20
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 21
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 22
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "leases",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('leases_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "unit",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "rent",
+            "data_type": "numeric",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "start_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "end_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "document_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "disputes",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('disputes_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "charge_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "reason",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'pending'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "resolution",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "resolved_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "resolved_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "created_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "CURRENT_TIMESTAMP",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "property_images_archive",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('property_images_archive_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "image_id",
+            "data_type": "uuid",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "image_url",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 500,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "size",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "mime_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "uploaded_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "deleted_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "deleted_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "lease_history",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('lease_history_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "lease_start_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "lease_end_date",
+            "data_type": "date",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'active'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "unit_status_history",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('unit_status_history_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "unit_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "old_status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "new_status",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "changed_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "changed_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "reason",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "notes",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "rent_change",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "old_rent",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "new_rent",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "tenant_notifications",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_notifications_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "notification_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "priority",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'normal'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "message",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "action_url",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 500,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "action_label",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "read",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "read_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "dismissed",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "delivered_via",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "sent_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "metadata",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "expires_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "tenant_dashboard_widgets",
+        "schemaname": "public",
+        "size": "32 kB",
+        "size_bytes": 32768,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_dashboard_widgets_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "widget_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "position",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "visible",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "settings",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "tenant_dashboard_widgets_tenant_id_widget_type_key": [
+            "tenant_id",
+            "widget_type"
+          ]
+        }
+      },
+      {
+        "table_name": "tenant_announcement_reads",
+        "schemaname": "public",
+        "size": "24 kB",
+        "size_bytes": 24576,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_announcement_reads_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "announcement_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "viewed_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "acknowledged",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "acknowledged_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "tenant_announcement_reads_announcement_id_tenant_id_key": [
+            "announcement_id",
+            "tenant_id"
+          ]
+        }
+      },
+      {
+        "table_name": "payment_receipts",
+        "schemaname": "public",
+        "size": "24 kB",
+        "size_bytes": 24576,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('payment_receipts_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "payment_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "receipt_number",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "pdf_url",
+            "data_type": "text",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "payment_receipts_receipt_number_key": [
+            "receipt_number"
+          ]
+        }
+      },
+      {
+        "table_name": "admin_quick_actions",
+        "schemaname": "public",
+        "size": "24 kB",
+        "size_bytes": 24576,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('admin_quick_actions_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "admin_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "action_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "entity_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "entity_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "execution_time_ms",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "property_announcements",
+        "schemaname": "public",
+        "size": "24 kB",
+        "size_bytes": 24576,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('property_announcements_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "property_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "title",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "content",
+            "data_type": "text",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "announcement_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "priority",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'normal'::character varying",
+            "character_maximum_length": 20,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "target_all_tenants",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "target_specific_units",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "published",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "published_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "expires_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "views_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "acknowledged_count",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "attachments",
+            "data_type": "jsonb",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "created_by",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "tenant_preferences",
+        "schemaname": "public",
+        "size": "16 kB",
+        "size_bytes": 16384,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_preferences_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "email_notifications",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "sms_notifications",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "push_notifications",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "payment_reminders",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "maintenance_updates",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "lease_reminders",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "community_announcements",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "preferred_contact_method",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'email'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "preferred_contact_time",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "dashboard_layout",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'default'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 12
+          },
+          {
+            "column_name": "theme",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'light'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 13
+          },
+          {
+            "column_name": "language",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'en'::character varying",
+            "character_maximum_length": 10,
+            "ordinal_position": 14
+          },
+          {
+            "column_name": "auto_pay_enabled",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 15
+          },
+          {
+            "column_name": "auto_pay_method",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 16
+          },
+          {
+            "column_name": "auto_pay_day_of_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "1",
+            "character_maximum_length": null,
+            "ordinal_position": 17
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 18
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 19
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "tenant_preferences_tenant_id_key": [
+            "tenant_id"
+          ]
+        }
+      },
+      {
+        "table_name": "tenant_quick_actions_log",
+        "schemaname": "public",
+        "size": "16 kB",
+        "size_bytes": 16384,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_quick_actions_log_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "action_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "execution_time_ms",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "success",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 6
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "tenant_payment_methods",
+        "schemaname": "public",
+        "size": "16 kB",
+        "size_bytes": 16384,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_payment_methods_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "type",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "last4",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 4,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "brand",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 50,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "token",
+            "data_type": "character varying",
+            "is_nullable": "NO",
+            "column_default": null,
+            "character_maximum_length": 255,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "is_default",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "is_active",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "true",
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "nickname",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": 100,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {}
+      },
+      {
+        "table_name": "tenant_autopay",
+        "schemaname": "public",
+        "size": "16 kB",
+        "size_bytes": 16384,
+        "row_count": 0,
+        "columns": [
+          {
+            "column_name": "id",
+            "data_type": "integer",
+            "is_nullable": "NO",
+            "column_default": "nextval('tenant_autopay_id_seq'::regclass)",
+            "character_maximum_length": null,
+            "ordinal_position": 1
+          },
+          {
+            "column_name": "tenant_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 2
+          },
+          {
+            "column_name": "payment_method_id",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 3
+          },
+          {
+            "column_name": "is_enabled",
+            "data_type": "boolean",
+            "is_nullable": "YES",
+            "column_default": "false",
+            "character_maximum_length": null,
+            "ordinal_position": 4
+          },
+          {
+            "column_name": "day_of_month",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "1",
+            "character_maximum_length": null,
+            "ordinal_position": 5
+          },
+          {
+            "column_name": "amount_type",
+            "data_type": "character varying",
+            "is_nullable": "YES",
+            "column_default": "'full_balance'::character varying",
+            "character_maximum_length": 50,
+            "ordinal_position": 6
+          },
+          {
+            "column_name": "fixed_amount",
+            "data_type": "numeric",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 7
+          },
+          {
+            "column_name": "next_execution_date",
+            "data_type": "date",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 8
+          },
+          {
+            "column_name": "consecutive_failures",
+            "data_type": "integer",
+            "is_nullable": "YES",
+            "column_default": "0",
+            "character_maximum_length": null,
+            "ordinal_position": 9
+          },
+          {
+            "column_name": "last_executed_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": null,
+            "character_maximum_length": null,
+            "ordinal_position": 10
+          },
+          {
+            "column_name": "created_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 11
+          },
+          {
+            "column_name": "updated_at",
+            "data_type": "timestamp without time zone",
+            "is_nullable": "YES",
+            "column_default": "now()",
+            "character_maximum_length": null,
+            "ordinal_position": 12
+          }
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "unique_constraints": {
+          "tenant_autopay_tenant_id_key": [
+            "tenant_id"
+          ]
+        }
+      }
+    ],
+    "foreign_keys": [
+      {
+        "from_table": "admin_action_items",
+        "from_column": "admin_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "admin_action_items_admin_id_fkey"
+      },
+      {
+        "from_table": "admin_action_items",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "admin_action_items_property_id_fkey"
+      },
+      {
+        "from_table": "admin_action_items",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "admin_action_items_tenant_id_fkey"
+      },
+      {
+        "from_table": "admin_dashboard_metrics",
+        "from_column": "admin_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "admin_dashboard_metrics_admin_id_fkey"
+      },
+      {
+        "from_table": "admin_quick_actions",
+        "from_column": "admin_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "admin_quick_actions_admin_id_fkey"
+      },
+      {
+        "from_table": "audit_logs",
+        "from_column": "user_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "audit_logs_user_id_fkey"
+      },
+      {
+        "from_table": "disputes",
+        "from_column": "created_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "disputes_created_by_fkey"
+      },
+      {
+        "from_table": "disputes",
+        "from_column": "resolved_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "disputes_resolved_by_fkey"
+      },
+      {
+        "from_table": "disputes",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "disputes_tenant_id_fkey"
+      },
+      {
+        "from_table": "disputes",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_disputes_deleted_by"
+      },
+      {
+        "from_table": "documents",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "documents_property_id_fkey"
+      },
+      {
+        "from_table": "documents",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "documents_tenant_id_fkey"
+      },
+      {
+        "from_table": "documents",
+        "from_column": "uploaded_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "documents_uploaded_by_fkey"
+      },
+      {
+        "from_table": "documents",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_documents_deleted_by"
+      },
+      {
+        "from_table": "expense_budgets",
+        "from_column": "approved_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "expense_budgets_approved_by_fkey"
+      },
+      {
+        "from_table": "expense_budgets",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "expense_budgets_property_id_fkey"
+      },
+      {
+        "from_table": "lease_expiration_reminders",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_lease_exp_rem_deleted_by"
+      },
+      {
+        "from_table": "lease_expiration_reminders",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "lease_expiration_reminders_property_id_fkey"
+      },
+      {
+        "from_table": "lease_expiration_reminders",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "lease_expiration_reminders_tenant_id_fkey"
+      },
+      {
+        "from_table": "lease_history",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "lease_history_tenant_id_fkey"
+      },
+      {
+        "from_table": "leases",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_leases_deleted_by"
+      },
+      {
+        "from_table": "leases",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "leases_property_id_fkey"
+      },
+      {
+        "from_table": "leases",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "leases_tenant_id_fkey"
+      },
+      {
+        "from_table": "maintenance",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_maintenance_deleted_by"
+      },
+      {
+        "from_table": "maintenance",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "maintenance_property_id_fkey"
+      },
+      {
+        "from_table": "maintenance",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "maintenance_tenant_id_fkey"
+      },
+      {
+        "from_table": "notifications",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_notifications_deleted_by"
+      },
+      {
+        "from_table": "notifications",
+        "from_column": "user_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "notifications_user_id_fkey"
+      },
+      {
+        "from_table": "payment_receipts",
+        "from_column": "payment_id",
+        "to_table": "payments",
+        "to_column": "id",
+        "constraint_name": "payment_receipts_payment_id_fkey"
+      },
+      {
+        "from_table": "payments",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_payments_deleted_by"
+      },
+      {
+        "from_table": "payments",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "payments_tenant_id_fkey"
+      },
+      {
+        "from_table": "properties",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_properties_deleted_by"
+      },
+      {
+        "from_table": "property_announcements",
+        "from_column": "created_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "property_announcements_created_by_fkey"
+      },
+      {
+        "from_table": "property_announcements",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "property_announcements_property_id_fkey"
+      },
+      {
+        "from_table": "property_expenses",
+        "from_column": "approved_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "property_expenses_approved_by_fkey"
+      },
+      {
+        "from_table": "property_expenses",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "property_expenses_property_id_fkey"
+      },
+      {
+        "from_table": "property_expenses",
+        "from_column": "recorded_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "property_expenses_recorded_by_fkey"
+      },
+      {
+        "from_table": "property_images_archive",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "property_images_archive_deleted_by_fkey"
+      },
+      {
+        "from_table": "property_images_archive",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "property_images_archive_property_id_fkey"
+      },
+      {
+        "from_table": "property_metrics",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "property_metrics_property_id_fkey"
+      },
+      {
+        "from_table": "property_units",
+        "from_column": "current_tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "property_units_current_tenant_id_fkey"
+      },
+      {
+        "from_table": "property_units",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "property_units_property_id_fkey"
+      },
+      {
+        "from_table": "recurring_expenses",
+        "from_column": "created_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "recurring_expenses_created_by_fkey"
+      },
+      {
+        "from_table": "recurring_expenses",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "recurring_expenses_property_id_fkey"
+      },
+      {
+        "from_table": "tenant_announcement_reads",
+        "from_column": "announcement_id",
+        "to_table": "property_announcements",
+        "to_column": "id",
+        "constraint_name": "tenant_announcement_reads_announcement_id_fkey"
+      },
+      {
+        "from_table": "tenant_announcement_reads",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_announcement_reads_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_autopay",
+        "from_column": "payment_method_id",
+        "to_table": "tenant_payment_methods",
+        "to_column": "id",
+        "constraint_name": "tenant_autopay_payment_method_id_fkey"
+      },
+      {
+        "from_table": "tenant_autopay",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_autopay_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_dashboard_widgets",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_dashboard_widgets_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_notifications",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_notifications_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_payment_methods",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_payment_methods_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_preferences",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_preferences_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenant_quick_actions_log",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "tenant_quick_actions_log_tenant_id_fkey"
+      },
+      {
+        "from_table": "tenants",
+        "from_column": "user_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_tenant_user"
+      },
+      {
+        "from_table": "tenants",
+        "from_column": "deleted_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_tenants_deleted_by"
+      },
+      {
+        "from_table": "tenants",
+        "from_column": "user_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "fk_tenants_user_id"
+      },
+      {
+        "from_table": "tenants",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "tenants_property_id_fkey"
+      },
+      {
+        "from_table": "token_blacklist",
+        "from_column": "user_id",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "token_blacklist_user_id_fkey"
+      },
+      {
+        "from_table": "unit_status_history",
+        "from_column": "changed_by",
+        "to_table": "users",
+        "to_column": "id",
+        "constraint_name": "unit_status_history_changed_by_fkey"
+      },
+      {
+        "from_table": "unit_status_history",
+        "from_column": "tenant_id",
+        "to_table": "tenants",
+        "to_column": "id",
+        "constraint_name": "unit_status_history_tenant_id_fkey"
+      },
+      {
+        "from_table": "unit_status_history",
+        "from_column": "unit_id",
+        "to_table": "property_units",
+        "to_column": "id",
+        "constraint_name": "unit_status_history_unit_id_fkey"
+      },
+      {
+        "from_table": "users",
+        "from_column": "property_id",
+        "to_table": "properties",
+        "to_column": "id",
+        "constraint_name": "fk_users_property"
+      }
+    ],
+    "indexes": [
+      {
+        "schemaname": "public",
+        "tablename": "admin_action_items",
+        "indexname": "admin_action_items_pkey",
+        "indexdef": "CREATE UNIQUE INDEX admin_action_items_pkey ON public.admin_action_items USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_action_items",
+        "indexname": "idx_action_items_admin_status",
+        "indexdef": "CREATE INDEX idx_action_items_admin_status ON public.admin_action_items USING btree (admin_id, status, priority, due_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_action_items",
+        "indexname": "idx_action_items_priority",
+        "indexdef": "CREATE INDEX idx_action_items_priority ON public.admin_action_items USING btree (priority, due_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_action_items",
+        "indexname": "idx_action_items_property",
+        "indexdef": "CREATE INDEX idx_action_items_property ON public.admin_action_items USING btree (property_id, status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_action_items",
+        "indexname": "idx_action_items_type",
+        "indexdef": "CREATE INDEX idx_action_items_type ON public.admin_action_items USING btree (item_type, status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "admin_dashboard_metrics_admin_id_metric_date_key",
+        "indexdef": "CREATE UNIQUE INDEX admin_dashboard_metrics_admin_id_metric_date_key ON public.admin_dashboard_metrics USING btree (admin_id, metric_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "admin_dashboard_metrics_pkey",
+        "indexdef": "CREATE UNIQUE INDEX admin_dashboard_metrics_pkey ON public.admin_dashboard_metrics USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "idx_admin_dashboard_admin_date",
+        "indexdef": "CREATE INDEX idx_admin_dashboard_admin_date ON public.admin_dashboard_metrics USING btree (admin_id, metric_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "idx_admin_dashboard_collection",
+        "indexdef": "CREATE INDEX idx_admin_dashboard_collection ON public.admin_dashboard_metrics USING btree (collection_rate DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "idx_admin_dashboard_date",
+        "indexdef": "CREATE INDEX idx_admin_dashboard_date ON public.admin_dashboard_metrics USING btree (metric_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_dashboard_metrics",
+        "indexname": "idx_admin_dashboard_occupancy",
+        "indexdef": "CREATE INDEX idx_admin_dashboard_occupancy ON public.admin_dashboard_metrics USING btree (occupancy_rate DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_quick_actions",
+        "indexname": "admin_quick_actions_pkey",
+        "indexdef": "CREATE UNIQUE INDEX admin_quick_actions_pkey ON public.admin_quick_actions USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_quick_actions",
+        "indexname": "idx_quick_actions_admin",
+        "indexdef": "CREATE INDEX idx_quick_actions_admin ON public.admin_quick_actions USING btree (admin_id, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "admin_quick_actions",
+        "indexname": "idx_quick_actions_type",
+        "indexdef": "CREATE INDEX idx_quick_actions_type ON public.admin_quick_actions USING btree (action_type, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "audit_logs_pkey",
+        "indexdef": "CREATE UNIQUE INDEX audit_logs_pkey ON public.audit_logs USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_action",
+        "indexdef": "CREATE INDEX idx_audit_action ON public.audit_logs USING btree (action)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_created_at",
+        "indexdef": "CREATE INDEX idx_audit_created_at ON public.audit_logs USING btree (created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_logs_table_created",
+        "indexdef": "CREATE INDEX idx_audit_logs_table_created ON public.audit_logs USING btree (action, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_resource",
+        "indexdef": "CREATE INDEX idx_audit_resource ON public.audit_logs USING btree (resource_type, resource_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_user_date",
+        "indexdef": "CREATE INDEX idx_audit_user_date ON public.audit_logs USING btree (user_id, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "audit_logs",
+        "indexname": "idx_audit_user_id",
+        "indexdef": "CREATE INDEX idx_audit_user_id ON public.audit_logs USING btree (user_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "disputes",
+        "indexname": "disputes_pkey",
+        "indexdef": "CREATE UNIQUE INDEX disputes_pkey ON public.disputes USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "disputes",
+        "indexname": "idx_disputes_active",
+        "indexdef": "CREATE INDEX idx_disputes_active ON public.disputes USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "disputes",
+        "indexname": "idx_disputes_deleted_at",
+        "indexdef": "CREATE INDEX idx_disputes_deleted_at ON public.disputes USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "documents_pkey",
+        "indexdef": "CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_active",
+        "indexdef": "CREATE INDEX idx_documents_active ON public.documents USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_deleted_at",
+        "indexdef": "CREATE INDEX idx_documents_deleted_at ON public.documents USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_entity",
+        "indexdef": "CREATE INDEX idx_documents_entity ON public.documents USING btree (entity_type, entity_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_property_id",
+        "indexdef": "CREATE INDEX idx_documents_property_id ON public.documents USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_tenant_id",
+        "indexdef": "CREATE INDEX idx_documents_tenant_id ON public.documents USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_type",
+        "indexdef": "CREATE INDEX idx_documents_type ON public.documents USING btree (type)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "documents",
+        "indexname": "idx_documents_uploaded_by",
+        "indexdef": "CREATE INDEX idx_documents_uploaded_by ON public.documents USING btree (uploaded_by)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_budgets",
+        "indexname": "expense_budgets_pkey",
+        "indexdef": "CREATE UNIQUE INDEX expense_budgets_pkey ON public.expense_budgets USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_budgets",
+        "indexname": "idx_expense_budgets_property_period",
+        "indexdef": "CREATE INDEX idx_expense_budgets_property_period ON public.expense_budgets USING btree (property_id, budget_year, budget_period)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_budgets",
+        "indexname": "idx_expense_budgets_status",
+        "indexdef": "CREATE INDEX idx_expense_budgets_status ON public.expense_budgets USING btree (budget_status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_budgets",
+        "indexname": "idx_expense_budgets_unique",
+        "indexdef": "CREATE UNIQUE INDEX idx_expense_budgets_unique ON public.expense_budgets USING btree (property_id, budget_year, budget_period, COALESCE(budget_month, 0))"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_categories",
+        "indexname": "expense_categories_category_name_key",
+        "indexdef": "CREATE UNIQUE INDEX expense_categories_category_name_key ON public.expense_categories USING btree (category_name)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_categories",
+        "indexname": "expense_categories_pkey",
+        "indexdef": "CREATE UNIQUE INDEX expense_categories_pkey ON public.expense_categories USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "expense_categories",
+        "indexname": "idx_expense_categories_parent",
+        "indexdef": "CREATE INDEX idx_expense_categories_parent ON public.expense_categories USING btree (parent_category)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "idx_lease_exp_rem_active",
+        "indexdef": "CREATE INDEX idx_lease_exp_rem_active ON public.lease_expiration_reminders USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "idx_lease_exp_rem_deleted_at",
+        "indexdef": "CREATE INDEX idx_lease_exp_rem_deleted_at ON public.lease_expiration_reminders USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "idx_lease_expiration_reminders_reminder_type",
+        "indexdef": "CREATE INDEX idx_lease_expiration_reminders_reminder_type ON public.lease_expiration_reminders USING btree (reminder_type)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "idx_lease_expiration_reminders_sent_at",
+        "indexdef": "CREATE INDEX idx_lease_expiration_reminders_sent_at ON public.lease_expiration_reminders USING btree (sent_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "idx_lease_expiration_reminders_tenant_id",
+        "indexdef": "CREATE INDEX idx_lease_expiration_reminders_tenant_id ON public.lease_expiration_reminders USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "lease_expiration_reminders_pkey",
+        "indexdef": "CREATE UNIQUE INDEX lease_expiration_reminders_pkey ON public.lease_expiration_reminders USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_expiration_reminders",
+        "indexname": "lease_expiration_reminders_tenant_id_reminder_type_key",
+        "indexdef": "CREATE UNIQUE INDEX lease_expiration_reminders_tenant_id_reminder_type_key ON public.lease_expiration_reminders USING btree (tenant_id, reminder_type)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_history",
+        "indexname": "idx_lease_history_status",
+        "indexdef": "CREATE INDEX idx_lease_history_status ON public.lease_history USING btree (status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_history",
+        "indexname": "idx_lease_history_tenant_id",
+        "indexdef": "CREATE INDEX idx_lease_history_tenant_id ON public.lease_history USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "lease_history",
+        "indexname": "lease_history_pkey",
+        "indexdef": "CREATE UNIQUE INDEX lease_history_pkey ON public.lease_history USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "leases",
+        "indexname": "idx_leases_active",
+        "indexdef": "CREATE INDEX idx_leases_active ON public.leases USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "leases",
+        "indexname": "idx_leases_deleted_at",
+        "indexdef": "CREATE INDEX idx_leases_deleted_at ON public.leases USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "leases",
+        "indexname": "leases_pkey",
+        "indexdef": "CREATE UNIQUE INDEX leases_pkey ON public.leases USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_active",
+        "indexdef": "CREATE INDEX idx_maintenance_active ON public.maintenance USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_deleted_at",
+        "indexdef": "CREATE INDEX idx_maintenance_deleted_at ON public.maintenance USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_open_property",
+        "indexdef": "CREATE INDEX idx_maintenance_open_property ON public.maintenance USING btree (property_id, created_at DESC) WHERE ((deleted_at IS NULL) AND ((status)::text = 'open'::text))"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_priority",
+        "indexdef": "CREATE INDEX idx_maintenance_priority ON public.maintenance USING btree (priority)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_property_deleted",
+        "indexdef": "CREATE INDEX idx_maintenance_property_deleted ON public.maintenance USING btree (property_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_property_id",
+        "indexdef": "CREATE INDEX idx_maintenance_property_id ON public.maintenance USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_status",
+        "indexdef": "CREATE INDEX idx_maintenance_status ON public.maintenance USING btree (status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_status_deleted",
+        "indexdef": "CREATE INDEX idx_maintenance_status_deleted ON public.maintenance USING btree (status, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_tenant_deleted",
+        "indexdef": "CREATE INDEX idx_maintenance_tenant_deleted ON public.maintenance USING btree (tenant_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_tenant_id",
+        "indexdef": "CREATE INDEX idx_maintenance_tenant_id ON public.maintenance USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "idx_maintenance_tenant_status_created",
+        "indexdef": "CREATE INDEX idx_maintenance_tenant_status_created ON public.maintenance USING btree (tenant_id, status, created_at DESC, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "maintenance",
+        "indexname": "maintenance_pkey",
+        "indexdef": "CREATE UNIQUE INDEX maintenance_pkey ON public.maintenance USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "mv_property_expense_summary",
+        "indexname": "idx_mv_property_expense_summary_admin",
+        "indexdef": "CREATE INDEX idx_mv_property_expense_summary_admin ON public.mv_property_expense_summary USING btree (admin_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "mv_property_expense_summary",
+        "indexname": "idx_mv_property_expense_summary_property_id",
+        "indexdef": "CREATE UNIQUE INDEX idx_mv_property_expense_summary_property_id ON public.mv_property_expense_summary USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "mv_unit_performance",
+        "indexname": "idx_mv_unit_performance_property",
+        "indexdef": "CREATE INDEX idx_mv_unit_performance_property ON public.mv_unit_performance USING btree (property_id, status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "mv_unit_performance",
+        "indexname": "idx_mv_unit_performance_status",
+        "indexdef": "CREATE INDEX idx_mv_unit_performance_status ON public.mv_unit_performance USING btree (status, days_vacant)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "mv_unit_performance",
+        "indexname": "idx_mv_unit_performance_unit_id",
+        "indexdef": "CREATE UNIQUE INDEX idx_mv_unit_performance_unit_id ON public.mv_unit_performance USING btree (unit_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_active",
+        "indexdef": "CREATE INDEX idx_notifications_active ON public.notifications USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_created",
+        "indexdef": "CREATE INDEX idx_notifications_created ON public.notifications USING btree (created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_deleted_at",
+        "indexdef": "CREATE INDEX idx_notifications_deleted_at ON public.notifications USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_tenant_read",
+        "indexdef": "CREATE INDEX idx_notifications_tenant_read ON public.notifications USING btree (tenant_id, is_read) WHERE (tenant_id IS NOT NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_user_created",
+        "indexdef": "CREATE INDEX idx_notifications_user_created ON public.notifications USING btree (user_id, created_at DESC) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "idx_notifications_user_read",
+        "indexdef": "CREATE INDEX idx_notifications_user_read ON public.notifications USING btree (user_id, is_read)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "notifications",
+        "indexname": "notifications_pkey",
+        "indexdef": "CREATE UNIQUE INDEX notifications_pkey ON public.notifications USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payment_receipts",
+        "indexname": "payment_receipts_pkey",
+        "indexdef": "CREATE UNIQUE INDEX payment_receipts_pkey ON public.payment_receipts USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payment_receipts",
+        "indexname": "payment_receipts_receipt_number_key",
+        "indexdef": "CREATE UNIQUE INDEX payment_receipts_receipt_number_key ON public.payment_receipts USING btree (receipt_number)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_active",
+        "indexdef": "CREATE INDEX idx_payments_active ON public.payments USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_completed_tenant_date",
+        "indexdef": "CREATE INDEX idx_payments_completed_tenant_date ON public.payments USING btree (tenant_id, date DESC) WHERE ((deleted_at IS NULL) AND ((status)::text = 'completed'::text))"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_covering_history",
+        "indexdef": "CREATE INDEX idx_payments_covering_history ON public.payments USING btree (tenant_id, deleted_at, date DESC) INCLUDE (amount, type, method, status) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_date",
+        "indexdef": "CREATE INDEX idx_payments_date ON public.payments USING btree (date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_date_deleted",
+        "indexdef": "CREATE INDEX idx_payments_date_deleted ON public.payments USING btree (date, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_deleted_at",
+        "indexdef": "CREATE INDEX idx_payments_deleted_at ON public.payments USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_status",
+        "indexdef": "CREATE INDEX idx_payments_status ON public.payments USING btree (status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_status_deleted",
+        "indexdef": "CREATE INDEX idx_payments_status_deleted ON public.payments USING btree (status, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_tenant_deleted",
+        "indexdef": "CREATE INDEX idx_payments_tenant_deleted ON public.payments USING btree (tenant_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_tenant_id",
+        "indexdef": "CREATE INDEX idx_payments_tenant_id ON public.payments USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "idx_payments_tenant_status_created",
+        "indexdef": "CREATE INDEX idx_payments_tenant_status_created ON public.payments USING btree (tenant_id, status, created_at DESC, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "payments",
+        "indexname": "payments_pkey",
+        "indexdef": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_active",
+        "indexdef": "CREATE INDEX idx_properties_active ON public.properties USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_admin_created",
+        "indexdef": "CREATE INDEX idx_properties_admin_created ON public.properties USING btree (admin_id, created_at DESC, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_admin_deleted",
+        "indexdef": "CREATE INDEX idx_properties_admin_deleted ON public.properties USING btree (admin_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_covering_dashboard",
+        "indexdef": "CREATE INDEX idx_properties_covering_dashboard ON public.properties USING btree (admin_id, deleted_at, created_at DESC) INCLUDE (name, address, units, rent, status) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_deleted_at",
+        "indexdef": "CREATE INDEX idx_properties_deleted_at ON public.properties USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_id_deleted",
+        "indexdef": "CREATE INDEX idx_properties_id_deleted ON public.properties USING btree (id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "idx_properties_images",
+        "indexdef": "CREATE INDEX idx_properties_images ON public.properties USING gin (images)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "properties",
+        "indexname": "properties_pkey",
+        "indexdef": "CREATE UNIQUE INDEX properties_pkey ON public.properties USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_announcements",
+        "indexname": "idx_announcements_property_published",
+        "indexdef": "CREATE INDEX idx_announcements_property_published ON public.property_announcements USING btree (property_id, published, published_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_announcements",
+        "indexname": "property_announcements_pkey",
+        "indexdef": "CREATE UNIQUE INDEX property_announcements_pkey ON public.property_announcements USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_capital",
+        "indexdef": "CREATE INDEX idx_property_expenses_capital ON public.property_expenses USING btree (is_capital_expense, expense_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_category",
+        "indexdef": "CREATE INDEX idx_property_expenses_category ON public.property_expenses USING btree (expense_category, expense_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_property_date",
+        "indexdef": "CREATE INDEX idx_property_expenses_property_date ON public.property_expenses USING btree (property_id, expense_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_recurring",
+        "indexdef": "CREATE INDEX idx_property_expenses_recurring ON public.property_expenses USING btree (is_recurring, expense_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_status",
+        "indexdef": "CREATE INDEX idx_property_expenses_status ON public.property_expenses USING btree (payment_status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "idx_property_expenses_vendor",
+        "indexdef": "CREATE INDEX idx_property_expenses_vendor ON public.property_expenses USING btree (vendor_name, expense_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_expenses",
+        "indexname": "property_expenses_pkey",
+        "indexdef": "CREATE UNIQUE INDEX property_expenses_pkey ON public.property_expenses USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_images_archive",
+        "indexname": "idx_property_images_archive_deleted_at",
+        "indexdef": "CREATE INDEX idx_property_images_archive_deleted_at ON public.property_images_archive USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_images_archive",
+        "indexname": "idx_property_images_archive_property_id",
+        "indexdef": "CREATE INDEX idx_property_images_archive_property_id ON public.property_images_archive USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_images_archive",
+        "indexname": "property_images_archive_pkey",
+        "indexdef": "CREATE UNIQUE INDEX property_images_archive_pkey ON public.property_images_archive USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "idx_property_metrics_date",
+        "indexdef": "CREATE INDEX idx_property_metrics_date ON public.property_metrics USING btree (metric_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "idx_property_metrics_occupancy",
+        "indexdef": "CREATE INDEX idx_property_metrics_occupancy ON public.property_metrics USING btree (occupancy_rate DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "idx_property_metrics_property_date",
+        "indexdef": "CREATE INDEX idx_property_metrics_property_date ON public.property_metrics USING btree (property_id, metric_date DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "idx_property_metrics_revenue",
+        "indexdef": "CREATE INDEX idx_property_metrics_revenue ON public.property_metrics USING btree (revenue DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "property_metrics_pkey",
+        "indexdef": "CREATE UNIQUE INDEX property_metrics_pkey ON public.property_metrics USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_metrics",
+        "indexname": "property_metrics_property_id_metric_date_key",
+        "indexdef": "CREATE UNIQUE INDEX property_metrics_property_id_metric_date_key ON public.property_metrics USING btree (property_id, metric_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_property",
+        "indexdef": "CREATE INDEX idx_property_units_property ON public.property_units USING btree (property_id, status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_rent",
+        "indexdef": "CREATE INDEX idx_property_units_rent ON public.property_units USING btree (base_rent)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_status",
+        "indexdef": "CREATE INDEX idx_property_units_status ON public.property_units USING btree (status) WHERE ((status)::text = 'vacant'::text)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_tenant",
+        "indexdef": "CREATE INDEX idx_property_units_tenant ON public.property_units USING btree (current_tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_type",
+        "indexdef": "CREATE INDEX idx_property_units_type ON public.property_units USING btree (unit_type)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "idx_property_units_vacant",
+        "indexdef": "CREATE INDEX idx_property_units_vacant ON public.property_units USING btree (property_id, days_vacant) WHERE ((status)::text = 'vacant'::text)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "property_units_pkey",
+        "indexdef": "CREATE UNIQUE INDEX property_units_pkey ON public.property_units USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "property_units",
+        "indexname": "property_units_property_id_unit_number_key",
+        "indexdef": "CREATE UNIQUE INDEX property_units_property_id_unit_number_key ON public.property_units USING btree (property_id, unit_number)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "recurring_expenses",
+        "indexname": "idx_recurring_expenses_category",
+        "indexdef": "CREATE INDEX idx_recurring_expenses_category ON public.recurring_expenses USING btree (expense_category)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "recurring_expenses",
+        "indexname": "idx_recurring_expenses_next_due",
+        "indexdef": "CREATE INDEX idx_recurring_expenses_next_due ON public.recurring_expenses USING btree (next_due_date) WHERE (is_active = true)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "recurring_expenses",
+        "indexname": "idx_recurring_expenses_property",
+        "indexdef": "CREATE INDEX idx_recurring_expenses_property ON public.recurring_expenses USING btree (property_id, is_active)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "recurring_expenses",
+        "indexname": "recurring_expenses_pkey",
+        "indexdef": "CREATE UNIQUE INDEX recurring_expenses_pkey ON public.recurring_expenses USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_announcement_reads",
+        "indexname": "idx_announcement_reads_tenant",
+        "indexdef": "CREATE INDEX idx_announcement_reads_tenant ON public.tenant_announcement_reads USING btree (tenant_id, viewed_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_announcement_reads",
+        "indexname": "tenant_announcement_reads_announcement_id_tenant_id_key",
+        "indexdef": "CREATE UNIQUE INDEX tenant_announcement_reads_announcement_id_tenant_id_key ON public.tenant_announcement_reads USING btree (announcement_id, tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_announcement_reads",
+        "indexname": "tenant_announcement_reads_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_announcement_reads_pkey ON public.tenant_announcement_reads USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_autopay",
+        "indexname": "tenant_autopay_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_autopay_pkey ON public.tenant_autopay USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_autopay",
+        "indexname": "tenant_autopay_tenant_id_key",
+        "indexdef": "CREATE UNIQUE INDEX tenant_autopay_tenant_id_key ON public.tenant_autopay USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_dashboard_widgets",
+        "indexname": "idx_dashboard_widgets_tenant",
+        "indexdef": "CREATE INDEX idx_dashboard_widgets_tenant ON public.tenant_dashboard_widgets USING btree (tenant_id, \"position\")"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_dashboard_widgets",
+        "indexname": "tenant_dashboard_widgets_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_dashboard_widgets_pkey ON public.tenant_dashboard_widgets USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_dashboard_widgets",
+        "indexname": "tenant_dashboard_widgets_tenant_id_widget_type_key",
+        "indexdef": "CREATE UNIQUE INDEX tenant_dashboard_widgets_tenant_id_widget_type_key ON public.tenant_dashboard_widgets USING btree (tenant_id, widget_type)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_home_summary",
+        "indexname": "idx_tenant_home_summary_property",
+        "indexdef": "CREATE INDEX idx_tenant_home_summary_property ON public.tenant_home_summary USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_home_summary",
+        "indexname": "idx_tenant_home_summary_tenant",
+        "indexdef": "CREATE UNIQUE INDEX idx_tenant_home_summary_tenant ON public.tenant_home_summary USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_notifications",
+        "indexname": "idx_tenant_notifications_priority",
+        "indexdef": "CREATE INDEX idx_tenant_notifications_priority ON public.tenant_notifications USING btree (priority, created_at DESC) WHERE (read = false)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_notifications",
+        "indexname": "idx_tenant_notifications_tenant_read",
+        "indexdef": "CREATE INDEX idx_tenant_notifications_tenant_read ON public.tenant_notifications USING btree (tenant_id, read, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_notifications",
+        "indexname": "tenant_notifications_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_notifications_pkey ON public.tenant_notifications USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_payment_methods",
+        "indexname": "idx_tenant_payment_methods_tenant",
+        "indexdef": "CREATE INDEX idx_tenant_payment_methods_tenant ON public.tenant_payment_methods USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_payment_methods",
+        "indexname": "tenant_payment_methods_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_payment_methods_pkey ON public.tenant_payment_methods USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_preferences",
+        "indexname": "tenant_preferences_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_preferences_pkey ON public.tenant_preferences USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_preferences",
+        "indexname": "tenant_preferences_tenant_id_key",
+        "indexdef": "CREATE UNIQUE INDEX tenant_preferences_tenant_id_key ON public.tenant_preferences USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_quick_actions_log",
+        "indexname": "idx_tenant_quick_actions_tenant",
+        "indexdef": "CREATE INDEX idx_tenant_quick_actions_tenant ON public.tenant_quick_actions_log USING btree (tenant_id, created_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenant_quick_actions_log",
+        "indexname": "tenant_quick_actions_log_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenant_quick_actions_log_pkey ON public.tenant_quick_actions_log USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenant_user",
+        "indexdef": "CREATE INDEX idx_tenant_user ON public.tenants USING btree (user_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_active",
+        "indexdef": "CREATE INDEX idx_tenants_active ON public.tenants USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_active_property",
+        "indexdef": "CREATE INDEX idx_tenants_active_property ON public.tenants USING btree (property_id, created_at DESC) WHERE ((deleted_at IS NULL) AND ((status)::text = 'active'::text))"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_covering_list",
+        "indexdef": "CREATE INDEX idx_tenants_covering_list ON public.tenants USING btree (property_id, deleted_at, created_at DESC) INCLUDE (name, email, unit, status, rent, balance) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_deleted_at",
+        "indexdef": "CREATE INDEX idx_tenants_deleted_at ON public.tenants USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_email",
+        "indexdef": "CREATE INDEX idx_tenants_email ON public.tenants USING btree (email)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_lease_end_date",
+        "indexdef": "CREATE INDEX idx_tenants_lease_end_date ON public.tenants USING btree (lease_end_date)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_lease_status",
+        "indexdef": "CREATE INDEX idx_tenants_lease_status ON public.tenants USING btree (lease_status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_property_created",
+        "indexdef": "CREATE INDEX idx_tenants_property_created ON public.tenants USING btree (property_id, created_at DESC, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_property_deleted",
+        "indexdef": "CREATE INDEX idx_tenants_property_deleted ON public.tenants USING btree (property_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_property_id",
+        "indexdef": "CREATE INDEX idx_tenants_property_id ON public.tenants USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_status",
+        "indexdef": "CREATE INDEX idx_tenants_status ON public.tenants USING btree (status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_status_deleted",
+        "indexdef": "CREATE INDEX idx_tenants_status_deleted ON public.tenants USING btree (status, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_user_deleted",
+        "indexdef": "CREATE INDEX idx_tenants_user_deleted ON public.tenants USING btree (user_id, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "idx_tenants_user_id",
+        "indexdef": "CREATE INDEX idx_tenants_user_id ON public.tenants USING btree (user_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "tenants_email_key",
+        "indexdef": "CREATE UNIQUE INDEX tenants_email_key ON public.tenants USING btree (email)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "tenants_pkey",
+        "indexdef": "CREATE UNIQUE INDEX tenants_pkey ON public.tenants USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "unique_tenant_per_user",
+        "indexdef": "CREATE UNIQUE INDEX unique_tenant_per_user ON public.tenants USING btree (user_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "tenants",
+        "indexname": "unique_user_tenant",
+        "indexdef": "CREATE UNIQUE INDEX unique_user_tenant ON public.tenants USING btree (user_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "token_blacklist",
+        "indexname": "idx_token_blacklist_token",
+        "indexdef": "CREATE INDEX idx_token_blacklist_token ON public.token_blacklist USING btree (token)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "token_blacklist",
+        "indexname": "token_blacklist_pkey",
+        "indexdef": "CREATE UNIQUE INDEX token_blacklist_pkey ON public.token_blacklist USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "token_blacklist",
+        "indexname": "token_blacklist_token_key",
+        "indexdef": "CREATE UNIQUE INDEX token_blacklist_token_key ON public.token_blacklist USING btree (token)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "unit_status_history",
+        "indexname": "idx_unit_status_history_tenant",
+        "indexdef": "CREATE INDEX idx_unit_status_history_tenant ON public.unit_status_history USING btree (tenant_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "unit_status_history",
+        "indexname": "idx_unit_status_history_unit",
+        "indexdef": "CREATE INDEX idx_unit_status_history_unit ON public.unit_status_history USING btree (unit_id, changed_at DESC)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "unit_status_history",
+        "indexname": "unit_status_history_pkey",
+        "indexdef": "CREATE UNIQUE INDEX unit_status_history_pkey ON public.unit_status_history USING btree (id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_active",
+        "indexdef": "CREATE INDEX idx_users_active ON public.users USING btree (id) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_deleted_at",
+        "indexdef": "CREATE INDEX idx_users_deleted_at ON public.users USING btree (deleted_at)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_email",
+        "indexdef": "CREATE INDEX idx_users_email ON public.users USING btree (email)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_property_id",
+        "indexdef": "CREATE INDEX idx_users_property_id ON public.users USING btree (property_id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_role",
+        "indexdef": "CREATE INDEX idx_users_role ON public.users USING btree (role)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_role_deleted",
+        "indexdef": "CREATE INDEX idx_users_role_deleted ON public.users USING btree (role, deleted_at) WHERE (deleted_at IS NULL)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "idx_users_status",
+        "indexdef": "CREATE INDEX idx_users_status ON public.users USING btree (status)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "users_email_key",
+        "indexdef": "CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "users",
+        "indexname": "users_pkey",
+        "indexdef": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+      }
+    ],
+    "triggers": [
+      {
+        "trigger_name": "trigger_action_items_timestamp",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "admin_action_items",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_action_items_timestamp()"
+      },
+      {
+        "trigger_name": "trigger_expense_budgets_timestamp",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "expense_budgets",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_expenses_timestamp()"
+      },
+      {
+        "trigger_name": "trg_payment_completed_balance_update",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "payments",
+        "action_timing": "AFTER",
+        "action_statement": "EXECUTE FUNCTION update_tenant_balance_on_payment_completion()"
+      },
+      {
+        "trigger_name": "trigger_property_expenses_timestamp",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "property_expenses",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_expenses_timestamp()"
+      },
+      {
+        "trigger_name": "trigger_property_units_timestamp",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "property_units",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_units_timestamp()"
+      },
+      {
+        "trigger_name": "trigger_unit_status_logging",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "property_units",
+        "action_timing": "AFTER",
+        "action_statement": "EXECUTE FUNCTION log_unit_status_change()"
+      },
+      {
+        "trigger_name": "trigger_update_lease_status",
+        "event_manipulation": "INSERT",
+        "event_object_table": "tenants",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_lease_status()"
+      },
+      {
+        "trigger_name": "trigger_update_lease_status",
+        "event_manipulation": "UPDATE",
+        "event_object_table": "tenants",
+        "action_timing": "BEFORE",
+        "action_statement": "EXECUTE FUNCTION update_lease_status()"
+      }
+    ],
+    "enums": [
+      {
+        "enum_name": "document_category",
+        "values": [
+          "lease",
+          "receipt",
+          "invoice",
+          "legal",
+          "photo",
+          "identification",
+          "other"
+        ]
+      },
+      {
+        "enum_name": "document_entity_type",
+        "values": [
+          "property",
+          "tenant",
+          "maintenance",
+          "payment",
+          "user"
+        ]
+      }
+    ],
+    "audit_log_tables": [
+      "audit_logs",
+      "tenant_quick_actions_log"
+    ],
+    "soft_delete_tables": [
+      "disputes",
+      "documents",
+      "lease_expiration_reminders",
+      "leases",
+      "maintenance",
+      "notifications",
+      "payments",
+      "properties",
+      "property_expenses",
+      "property_images_archive",
+      "property_units",
+      "tenants",
+      "users"
+    ]
+  }
+}

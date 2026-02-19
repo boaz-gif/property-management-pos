@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Tenant = require('../models/Tenant');
 const { USER_ROLES, HTTP_STATUS } = require('../utils/constants');
 
 class AuthService {
   static async register(userData) {
-    const { email } = userData;
+    const { email, role, property_id, unit, rent, move_in } = userData;
     
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -14,6 +15,21 @@ class AuthService {
     
     // Create new user
     const user = await User.create(userData);
+    
+    // If registering a tenant, also create tenant record
+    if (role === USER_ROLES.TENANT) {
+      const tenantData = {
+        name: userData.name,
+        email: userData.email,
+        property_id: property_id,
+        unit: unit,
+        rent: rent || 0,
+        move_in: move_in || new Date().toISOString().split('T')[0],
+        status: 'active',
+        user_id: user.id  // PHASE 1 FIX: Link tenant to user by ID
+      };
+      await Tenant.create(tenantData, user.id);
+    }
     
     // Generate JWT token
     const token = this.generateToken(user);

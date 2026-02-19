@@ -19,39 +19,46 @@ describe('Integration: Payment Flow', () => {
     const tenantId = 1;
     const paymentAmount = 1000;
     
-    // Mock User lookup (Auth middleware)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 1, role: 'tenant', property_id: 1, name: 'John Doe' }]
-    });
-
-    // Mock Payment Creation (INSERT into payments) - Happens BEFORE balance adjustment
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 101, tenant_id: 1, amount: 1000, status: 'completed', type: 'rent' }]
-    });
-
-    // Mock Tenant lookup (Inside adjustTenantBalance)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 1, name: 'John Doe', balance: 1000, property_id: 1 }]
-    });
-
-    // Mock Balance Update (UPDATE tenants)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 1, balance: 0 }]
-    });
-
-    // Mock Transaction Creation (INSERT into transactions)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 201 }]
-    });
-
-    // Mock Notification Creation 1 (Balance Update)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 301, message: 'Balance Updated' }]
-    });
-
-    // Mock Notification Creation 2 (Payment Confirmation)
-    Database.query.mockResolvedValueOnce({
-      rows: [{ id: 302, message: 'Payment Processed' }]
+    // Generic mock implementation to handle all queries correctly
+    Database.query.mockImplementation((query, params) => {
+      if (query.includes('FROM user_roles') || query.includes('FROM roles r')) {
+        return Promise.resolve({ rows: [{ ok: 1 }], rowCount: 1 });
+      }
+      // Auth middleware lookup
+      if (query.includes('FROM users') && query.includes('role')) {
+        return Promise.resolve({ rows: [{ id: 1, role: 'tenant', property_id: 1, name: 'John Doe' }] });
+      }
+      if (query.includes('SELECT 1') && query.includes('FROM schema_migrations')) {
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      }
+      // Payment Creation
+      if (query.includes('INSERT INTO payments')) {
+        return Promise.resolve({ rows: [{ id: 101, tenant_id: 1, amount: 1000, status: 'completed', type: 'rent' }] });
+      }
+      if (query.includes('SELECT id, user_id, property_id FROM tenants')) {
+        return Promise.resolve({ rows: [{ id: 1, user_id: 1, property_id: 1 }] });
+      }
+      if (query.includes('SELECT user_id FROM tenants')) {
+        return Promise.resolve({ rows: [{ user_id: 1 }], rowCount: 1 });
+      }
+      // Tenant lookup (inside adjustTenantBalance)
+      if (query.includes('FROM tenants') && query.includes('balance')) {
+        return Promise.resolve({ rows: [{ id: 1, name: 'John Doe', balance: 1000, property_id: 1 }] });
+      }
+      // Balance Update
+      if (query.includes('UPDATE tenants') && query.includes('balance')) {
+        return Promise.resolve({ rows: [{ id: 1, balance: 0 }] });
+      }
+      // Transaction Creation
+      if (query.includes('INSERT INTO transactions')) {
+        return Promise.resolve({ rows: [{ id: 201 }] });
+      }
+      // Notification Creation
+      if (query.includes('INSERT INTO notifications')) {
+        return Promise.resolve({ rows: [{ id: 301, message: 'Processed' }] });
+      }
+      // Default / Blacklist check / etc.
+      return Promise.resolve({ rows: [], rowCount: 0 });
     });
 
     // 2. Execute Request

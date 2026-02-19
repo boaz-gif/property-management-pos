@@ -1,8 +1,13 @@
 const Database = require('../utils/database');
+const BaseSoftDeleteModel = require('./BaseSoftDeleteModel');
 
-class Maintenance {
+class Maintenance extends BaseSoftDeleteModel {
+  constructor() {
+    super('maintenance', Database);
+  }
+
   static async create(requestData) {
-    const { tenantId, propertyId, title, priority, status, unit } = requestData;
+    const { tenantId, propertyId, title, description, priority, status, unit } = requestData;
 
     const query = `
       INSERT INTO maintenance (tenant_id, property_id, title, issue, priority, status, unit, date, created_at, updated_at)
@@ -14,7 +19,7 @@ class Maintenance {
       tenantId, 
       propertyId, 
       title, 
-      title, // Use title for issue
+      description || title, // Use description for issue if provided, else title
       priority || 'medium', 
       status || 'open',
       unit
@@ -33,10 +38,10 @@ class Maintenance {
              p.address as property_address,
              u.name as assigned_to_name
       FROM maintenance m
-      JOIN tenants t ON m.tenant_id = t.id
-      JOIN properties p ON m.property_id = p.id
-      LEFT JOIN users u ON m.assigned_to = u.id
-      WHERE m.id = $1
+      JOIN tenants t ON m.tenant_id = t.id AND t.deleted_at IS NULL
+      JOIN properties p ON m.property_id = p.id AND p.deleted_at IS NULL
+      LEFT JOIN users u ON m.assigned_to = u.id AND u.deleted_at IS NULL
+      WHERE m.id = $1 AND m.deleted_at IS NULL
     `;
 
     const params = [id];
@@ -45,13 +50,6 @@ class Maintenance {
     if (userRole === 'tenant') {
       query += ` AND m.tenant_id = $2`;
       params.push(userPropertyId);
-    } else if (userRole === 'admin') {
-      query += ` AND p.admin_id = $2`;
-      // We need admin's ID here, not the property list directly for this simple check
-      // But usually we pass userProperties. For now assuming admin_id check is sufficient via join if we had admin_id
-      // Let's use the property list check instead
-      // This is a bit complex in SQL directly without dynamic construction, so we'll do:
-      // We'll rely on the service to pass the right params or handle the check
     }
 
     const result = await Database.query(query, params);
@@ -67,6 +65,25 @@ class Maintenance {
     return result.rows[0];
   }
 
+  static async findByTenantId(tenantId) {
+    const query = `
+      SELECT m.*,
+             CASE
+               WHEN m.status = 'open' THEN 'Open'
+               WHEN m.status = 'in-progress' THEN 'In Progress'
+               WHEN m.status = 'completed' THEN 'Completed'
+               ELSE m.status
+             END as status_display
+      FROM maintenance m
+      WHERE m.tenant_id = $1 AND m.deleted_at IS NULL
+      ORDER BY m.date DESC
+      LIMIT 10
+    `;
+    
+    const result = await Database.query(query, [tenantId]);
+    return result.rows;
+  }
+
   static async findAll(userRole, userProperties, userPropertyId) {
     let query = `
       SELECT m.*, 
@@ -78,19 +95,20 @@ class Maintenance {
                ELSE 3
              END as priority_order
       FROM maintenance m
-      JOIN tenants t ON m.tenant_id = t.id
-      JOIN properties p ON m.property_id = p.id
+      JOIN tenants t ON m.tenant_id = t.id AND t.deleted_at IS NULL
+      JOIN properties p ON m.property_id = p.id AND p.deleted_at IS NULL
+      WHERE m.deleted_at IS NULL
     `;
 
     const params = [];
 
     if (userRole === 'tenant') {
-      query += ` WHERE m.tenant_id = $1`;
+      query += ` AND m.tenant_id = $1`;
       params.push(userPropertyId);
     } else if (userRole === 'admin') {
       // Filter by properties owned by admin
       if (userProperties && userProperties.length > 0) {
-        query += ` WHERE m.property_id = ANY($1)`;
+        query += ` AND m.property_id = ANY($1)`;
         params.push(userProperties);
       } else {
         // Admin with no properties sees nothing
@@ -126,20 +144,62 @@ class Maintenance {
       values.push(assignedTo);
     }
     
-    // If we had a resolution field in DB we would update it, but schema didn't explicitly have it
-    // We'll assume description might be appended or a separate notes table, 
-    // but for now let's stick to status/priority/assignment
-    
     updates.push(`updated_at = NOW()`);
 
     const query = `
       UPDATE maintenance
       SET ${updates.join(', ')}
-      WHERE id = $1
+      WHERE id = $1 AND deleted_at IS NULL
       RETURNING *
     `;
 
     const result = await Database.query(query, values);
+    return result.rows[0];
+  }
+
+  static async archive(id, user) {
+    const query = `
+      UPDATE maintenance 
+      SET deleted_at = CURRENT_TIMESTAMP, deleted_by = $1 
+      WHERE id = $2 AND deleted_at IS NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [user.id, id]);
+    return result.rows[0];
+  }
+
+  static async restore(id, user) {
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      throw new Error('Only admins can restore archived maintenance requests');
+    }
+    
+    const query = `
+      UPDATE maintenance 
+      SET deleted_at = NULL, deleted_by = NULL 
+      WHERE id = $1 AND deleted_at IS NOT NULL 
+      RETURNING *
+    `;
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Maintenance request not found or not archived');
+    }
+    
+    return result.rows[0];
+  }
+
+  static async permanentDelete(id, user) {
+    if (user.role !== 'super_admin') {
+      throw new Error('Only super admins can permanently delete records');
+    }
+    
+    const query = 'DELETE FROM maintenance WHERE id = $1 RETURNING *';
+    const result = await Database.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      throw new Error('Maintenance request not found');
+    }
+    
     return result.rows[0];
   }
 }
