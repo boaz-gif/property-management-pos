@@ -91,7 +91,12 @@ const corsConfig = cors({
     'X-CSRF-Token',
     'Accept',
     'Accept-Language',
-    'Content-Language'
+    'Content-Language',
+    'X-Trace-Id',
+    'X-Action-Id',
+    'Cache-Control',
+    'If-None-Match',
+    'Accept-Encoding'
   ],
   exposedHeaders: [
     'RateLimit-Limit',
