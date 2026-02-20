@@ -62,6 +62,8 @@ const Login = () => {
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
                             <input
+                                id="email"
+                                name="email"
                                 type="email"
                                 required
                                 autoComplete="email"
@@ -83,6 +85,8 @@ const Login = () => {
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
                             <input
+                                id="password"
+                                name="password"
                                 type="password"
                                 required
                                 autoComplete="current-password"
