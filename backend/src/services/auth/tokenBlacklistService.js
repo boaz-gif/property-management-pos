@@ -1,5 +1,6 @@
 const pool = require('../../config/database');
 const jwt = require('jsonwebtoken');
+const redisClient = require('../../config/redis');
 
 class TokenBlacklistService {
   /**
@@ -23,6 +24,15 @@ class TokenBlacklistService {
       `;
 
       const result = await pool.query(query, [token, userId, expiresAt]);
+      
+      // Invalidate the blacklist cache so the token is checked from DB
+      const cacheKey = `pms:blacklist:${token}`;
+      try {
+        await redisClient.del(cacheKey);
+      } catch (cacheError) {
+        console.warn('Failed to invalidate blacklist cache:', cacheError.message);
+      }
+      
       return result.rows[0];
     } catch (error) {
       throw new Error(`Failed to blacklist token: ${error.message}`);

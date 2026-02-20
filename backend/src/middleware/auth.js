@@ -1,6 +1,36 @@
 const AuthService = require('../services/auth/authService');
 const TokenBlacklistService = require('../services/auth/tokenBlacklistService');
 const { USER_ROLES, HTTP_STATUS } = require('../utils/constants');
+const redisClient = require('../config/redis');
+
+const BLACKLIST_CACHE_TTL = 300; // 5 minutes
+
+// Check if token is blacklisted with Redis caching
+const checkBlacklist = async (token) => {
+  const cacheKey = `pms:blacklist:${token}`;
+  
+  try {
+    // Try to get from Redis cache first
+    const cached = await redisClient.get(cacheKey);
+    if (cached !== null) {
+      return cached === 'true';
+    }
+    
+    // Cache miss - check database
+    const isBlacklisted = await TokenBlacklistService.isTokenBlacklisted(token);
+    
+    // Cache the result (only cache false to avoid caching blacklisted tokens indefinitely)
+    if (!isBlacklisted) {
+      await redisClient.set(cacheKey, 'false', BLACKLIST_CACHE_TTL);
+    }
+    
+    return isBlacklisted;
+  } catch (error) {
+    // If Redis fails, fall back to database check
+    console.warn('Blacklist cache check failed, falling back to DB:', error.message);
+    return await TokenBlacklistService.isTokenBlacklisted(token);
+  }
+};
 
 // Authenticate user with JWT token
 const authenticate = async (req, res, next) => {
@@ -16,8 +46,8 @@ const authenticate = async (req, res, next) => {
     
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Check if token is blacklisted
-    const isBlacklisted = await TokenBlacklistService.isTokenBlacklisted(token);
+    // Check if token is blacklisted (with Redis caching)
+    const isBlacklisted = await checkBlacklist(token);
     if (isBlacklisted) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
@@ -29,19 +59,16 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = AuthService.verifyToken(token);
     
-    // Get user from database
-    const User = require('../models/User');
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-    
-    // Attach user to request
-    req.user = user;
+    // Trust the decoded JWT data - no database query needed
+    // JWT already contains: id, email, role, properties, property_id, unit
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+      properties: decoded.properties,
+      property_id: decoded.property_id,
+      unit: decoded.unit
+    };
     req.token = token;
     
     next();

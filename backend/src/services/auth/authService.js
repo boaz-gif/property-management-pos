@@ -96,19 +96,21 @@ class AuthService {
 
   static async refreshToken(token) {
     const decoded = this.verifyToken(token);
-    const user = await User.findById(decoded.id);
     
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const newToken = jwt.sign(
+        {
+            id: decoded.id,
+            email: decoded.email,
+            role: decoded.role,
+            properties: decoded.properties,
+            property_id: decoded.property_id,
+            unit: decoded.unit
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
     
-    // Generate new token
-    const newToken = this.generateToken(user);
-    
-    return {
-      user,
-      token: newToken
-    };
+    return { user: decoded, token: newToken };
   }
 
   static async changePassword(userId, currentPassword, newPassword) {
