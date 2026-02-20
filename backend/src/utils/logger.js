@@ -43,7 +43,19 @@ const errorLogger = (err, req, res, next) => {
   next(err);
 };
 
+const appLogger = {
+  info: (message, ...args) => console.log(`[${new Date().toISOString()}] [INFO] ${message}`, ...args),
+  error: (message, ...args) => console.error(`[${new Date().toISOString()}] [ERROR] ${message}`, ...args),
+  warn: (message, ...args) => console.warn(`[${new Date().toISOString()}] [WARN] ${message}`, ...args),
+  debug: (message, ...args) => console.log(`[${new Date().toISOString()}] [DEBUG] ${message}`, ...args),
+};
+
+// Attach appLogger methods to the logger middleware for files that destructure { logger }
+Object.assign(logger, appLogger);
+
 module.exports = {
   logger,
-  errorLogger
+  errorLogger,
+  appLogger,
+  ...appLogger
 };

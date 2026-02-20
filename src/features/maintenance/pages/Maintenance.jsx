@@ -7,15 +7,7 @@ import GlassCard from '../../../components/ui/GlassCard';
 import GlassButton from '../../../components/ui/GlassButton';
 import PageHeader from '../../../components/ui/PageHeader';
 
-const Maintenance = () => {
-    const { on } = useSocket();
-    const [requests, setRequests] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({ title: '', priority: 'medium', description: '' });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [filter, setFilter] = useState('all'); 
-    const [searchTerm, setSearchTerm] = useState('');
+const VirtualizedGrid = ({ filteredRequests }) => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -35,6 +27,113 @@ const Maintenance = () => {
             arr.slice(i * size, i * size + size)
         );
     };
+
+    const cols = getCols();
+    const rows = chunkArray(filteredRequests, cols);
+    const parentRef = React.useRef(null);
+
+    const rowVirtualizer = useVirtualizer({
+        count: rows.length,
+        getScrollElement: React.useCallback(() => parentRef.current, []),
+        estimateSize: () => 340,
+        overscan: 2,
+    });
+
+    return (
+        <div 
+            ref={parentRef}
+            className="overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+            style={{ height: `700px` }}
+        >
+            <div
+                style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                }}
+            >
+                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                    const rowItems = rows[virtualRow.index];
+                    return (
+                        <div
+                            key={virtualRow.key}
+                            className="absolute top-0 left-0 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            style={{
+                                height: `${virtualRow.size}px`,
+                                transform: `translateY(${virtualRow.start}px)`,
+                                paddingBottom: '24px' // Gap replacement
+                            }}
+                        >
+                            {rowItems.map((request) => (
+                                <GlassCard
+                                    key={request.id}
+                                    className="group hover:border-blue-500/30 transition-all duration-300"
+                                >
+                                    <div className="p-5 space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <div className={`p-2 rounded-lg ${
+                                                request.priority === 'emergency' ? 'bg-red-500/10 text-red-500' :
+                                                request.priority === 'high' ? 'bg-orange-500/10 text-orange-500' :
+                                                'bg-blue-500/10 text-blue-500'
+                                            }`}>
+                                                <AlertCircle className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                                    request.status === 'completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                    request.status === 'in_progress' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                    'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                                                }`}>
+                                                    {request.status.replace('_', ' ')}
+                                                </span>
+                                                <p className="text-[10px] text-gray-500 font-medium">#{request.id.slice(-6)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-white font-bold group-hover:text-blue-400 transition-colors">{request.title}</h4>
+                                            <p className="text-gray-400 text-sm mt-1 line-clamp-2">{request.description}</p>
+                                        </div>
+
+                                        <div className="pt-4 border-t border-white/5 space-y-3">
+                                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                                <Home className="h-3.5 w-3.5 text-blue-400" />
+                                                <span className="truncate">{request.property_name} • Unit {request.unit_number}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                                <User className="h-3.5 w-3.5 text-purple-400" />
+                                                <span>{request.tenant_name}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between mt-4">
+                                                <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                                                    <Clock className="h-3 w-3" />
+                                                    {request.created_at}
+                                                </div>
+                                                <GlassButton size="xs" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    View Details
+                                                </GlassButton>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            ))}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const Maintenance = () => {
+    const { on } = useSocket();
+    const [requests, setRequests] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({ title: '', priority: 'medium', description: '' });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [filter, setFilter] = useState('all'); 
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchRequests();
@@ -170,103 +269,7 @@ const Maintenance = () => {
 
             <div className="h-[700px]">
                 {filteredRequests.length > 0 ? (
-                    (() => {
-                        const cols = getCols();
-                        const rows = chunkArray(filteredRequests, cols);
-                        const parentRef = React.useRef(null);
-
-                        const rowVirtualizer = useVirtualizer({
-                            count: rows.length,
-                            getScrollElement: () => parentRef.current,
-                            estimateSize: () => 340,
-                            overscan: 2,
-                        });
-
-                        return (
-                            <div 
-                                ref={parentRef}
-                                className="overflow-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
-                                style={{ height: `700px` }}
-                            >
-                                <div
-                                    style={{
-                                        height: `${rowVirtualizer.getTotalSize()}px`,
-                                        width: '100%',
-                                        position: 'relative',
-                                    }}
-                                >
-                                    {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                                        const rowItems = rows[virtualRow.index];
-                                        return (
-                                            <div
-                                                key={virtualRow.key}
-                                                className="absolute top-0 left-0 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                                                style={{
-                                                    height: `${virtualRow.size}px`,
-                                                    transform: `translateY(${virtualRow.start}px)`,
-                                                    paddingBottom: '24px' // Gap replacement
-                                                }}
-                                            >
-                                                {rowItems.map((request) => (
-                                                    <GlassCard
-                                                        key={request.id}
-                                                        className="group hover:border-blue-500/30 transition-all duration-300"
-                                                    >
-                                                        <div className="p-5 space-y-4">
-                                                            <div className="flex justify-between items-start">
-                                                                <div className={`p-2 rounded-lg ${
-                                                                    request.priority === 'emergency' ? 'bg-red-500/10 text-red-500' :
-                                                                    request.priority === 'high' ? 'bg-orange-500/10 text-orange-500' :
-                                                                    'bg-blue-500/10 text-blue-500'
-                                                                }`}>
-                                                                    <AlertCircle className="h-5 w-5" />
-                                                                </div>
-                                                                <div className="flex flex-col items-end gap-2">
-                                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                                                                        request.status === 'completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                                        request.status === 'in_progress' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                                        'bg-orange-500/10 text-orange-500 border-orange-500/20'
-                                                                    }`}>
-                                                                        {request.status.replace('_', ' ')}
-                                                                    </span>
-                                                                    <p className="text-[10px] text-gray-500 font-medium">#{request.id.slice(-6)}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div>
-                                                                <h4 className="text-white font-bold group-hover:text-blue-400 transition-colors">{request.title}</h4>
-                                                                <p className="text-gray-400 text-sm mt-1 line-clamp-2">{request.description}</p>
-                                                            </div>
-
-                                                            <div className="pt-4 border-t border-white/5 space-y-3">
-                                                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                                                    <Home className="h-3.5 w-3.5 text-blue-400" />
-                                                                    <span className="truncate">{request.property_name} • Unit {request.unit_number}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                                                    <User className="h-3.5 w-3.5 text-purple-400" />
-                                                                    <span>{request.tenant_name}</span>
-                                                                </div>
-                                                                <div className="flex items-center justify-between mt-4">
-                                                                    <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
-                                                                        <Clock className="h-3 w-3" />
-                                                                        {request.created_at}
-                                                                    </div>
-                                                                    <GlassButton size="xs" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        View Details
-                                                                    </GlassButton>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </GlassCard>
-                                                ))}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })()
+                    <VirtualizedGrid filteredRequests={filteredRequests} />
                 ) : (
                     <div className="col-span-full py-20 text-center">
                         <div className="bg-white/5 rounded-2xl p-8 border border-white/10 max-w-sm mx-auto">

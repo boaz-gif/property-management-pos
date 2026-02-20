@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const adminDashboardService = require('../services/dashboard/adminDashboardService');
-const logger = require('../utils/logger');
+const { appLogger: logger } = require('../utils/logger');
 const Database = require('../utils/database');
 
 class AdminDashboardCron {

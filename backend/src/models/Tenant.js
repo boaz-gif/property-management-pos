@@ -774,7 +774,7 @@ class Tenant extends BaseSoftDeleteModel {
              t.user_id as tenant_user_id, t.property_id,
              p.name as property_name, 
              u.email as admin_email, u.name as admin_name,
-             DATE_PART('day', CURRENT_DATE - t.lease_end_date) as days_expired
+             (CURRENT_DATE - t.lease_end_date)::integer as days_expired
       FROM tenants t
       JOIN properties p ON t.property_id = p.id AND p.deleted_at IS NULL
       JOIN users u ON p.admin_id = u.id AND u.deleted_at IS NULL
