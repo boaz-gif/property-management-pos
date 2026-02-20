@@ -86,7 +86,7 @@ const VirtualizedGrid = ({ filteredRequests }) => {
                                                 }`}>
                                                     {request.status.replace('_', ' ')}
                                                 </span>
-                                                <p className="text-[10px] text-gray-500 font-medium">#{request.id.slice(-6)}</p>
+                                                <p className="text-[10px] text-gray-500 font-medium">#{String(request.id).slice(-6)}</p>
                                             </div>
                                         </div>
 
