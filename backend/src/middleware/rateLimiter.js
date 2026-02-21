@@ -1,5 +1,5 @@
 const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
-const redisClient = require('../../config/redis');
+const redisClient = require('../config/redis');
 
 // Use the shared Redis client from config
 let store = undefined; // Initialize store at module level
