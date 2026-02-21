@@ -8,9 +8,9 @@ let RedisStore = null;
 // Try to use the shared Redis client if it's connected
 try {
   if (redisClient.enabled && redisClient.isConnected) {
-    RedisStore = require('rate-limit-redis');
+    const { RedisStore } = require('rate-limit-redis');
     store = new RedisStore({
-      client: redisClient.client,
+      sendCommand: (...args) => redisClient.client.sendCommand(args),
       prefix: 'rate-limit:'
     });
     console.log('✓ Using shared Redis client for rate limiting');
@@ -28,9 +28,9 @@ try {
 redisClient.onReady(() => {
   if (redisClient.enabled && redisClient.isConnected && !store) {
     try {
-      RedisStore = require('rate-limit-redis');
+      const { RedisStore } = require('rate-limit-redis');
       store = new RedisStore({
-        client: redisClient.client,
+        sendCommand: (...args) => redisClient.client.sendCommand(args),
         prefix: 'rate-limit:'
       });
       console.log('✓ Rate limiting now using Redis (distributed rate limiting enabled)');

@@ -175,7 +175,7 @@ class Document extends BaseSoftDeleteModel {
        // 1. Docs they own/uploaded
        // 2. Docs linked to them explicitly
        // 3. Docs linked to their Property that are NOT sensitive (TODO: Add 'is_public' flag later?)
-       query += ` AND (d.user_id = $${paramCount} OR (d.entity_type = 'tenant' AND d.entity_id = (SELECT id FROM tenants WHERE user_id = $${paramCount} LIMIT 1)))`;
+       query += ` AND (d.uploaded_by = $${paramCount} OR (d.entity_type = 'tenant' AND d.entity_id = (SELECT id FROM tenants WHERE user_id = $${paramCount} LIMIT 1)))`;
        params.push(userId);
        paramCount++;
     } else if (userRole === 'admin') {
