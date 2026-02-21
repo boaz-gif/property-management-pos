@@ -546,7 +546,7 @@ class AdminDashboardService {
     const cacheKey = Cache.generateKey('admin_dashboard', 'overview', { adminId });
     
     // Clear cache
-    await Cache.delete(cacheKey);
+    await Cache.invalidateKey(cacheKey);
     
     // Generate fresh metrics
     await this.generateMetricsForAdmin(adminId);

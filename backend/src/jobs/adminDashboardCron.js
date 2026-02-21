@@ -476,7 +476,7 @@ class AdminDashboardCron {
 
       for (const admin of admins) {
         const cacheKey = Cache.generateKey('admin_dashboard', 'overview', { adminId: admin.id });
-        await Cache.delete(cacheKey);
+        await Cache.invalidateKey(cacheKey);
       }
 
       logger.debug(`Cache cleanup completed for ${admins.length} admins`);
