@@ -13,7 +13,22 @@ class RedisClient {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 10;
     this.enabled = process.env.REDIS_ENABLED !== 'false';
+    this.readyCallbacks = []; // Callbacks to run when Redis becomes ready
     console.log(`🔴 Redis enabled status: ${this.enabled} (REDIS_ENABLED=${process.env.REDIS_ENABLED})`);
+  }
+
+  /**
+   * Register a callback to be called when Redis is ready
+   * @param {Function} callback - Function to call when Redis connects
+   */
+  onReady(callback) {
+    if (this.isConnected) {
+      // Already connected, call immediately
+      callback();
+    } else {
+      // Queue for when connection is established
+      this.readyCallbacks.push(callback);
+    }
   }
 
   async connect() {
@@ -53,6 +68,9 @@ class RedisClient {
 
       this.client.on('ready', () => {
         console.log('🔴 Redis client ready');
+        // Fire all registered callbacks
+        this.readyCallbacks.forEach(cb => cb());
+        this.readyCallbacks = [];
       });
 
       this.client.on('error', (err) => {

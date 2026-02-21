@@ -207,6 +207,7 @@ if (require.main === module) {
 
   const logStartup = (port) => {
     cacheService.init();
+    
     console.log(`Server running on http://${host}:${port}`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
     console.log(`API Documentation: http://${host}:${port}/api`);

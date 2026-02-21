@@ -1,27 +1,44 @@
 const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
+const redisClient = require('../../config/redis');
 
-// Create Redis client for rate limiting (optional - can use memory store for simple setups)
-let redisClient = null;
-let RedisStore = null;
+// Use the shared Redis client from config
 let store = undefined; // Initialize store at module level
+let RedisStore = null;
 
+// Try to use the shared Redis client if it's connected
 try {
-  if (process.env.REDIS_URL) {
-    const redis = require('redis');
+  if (redisClient.enabled && redisClient.isConnected) {
     RedisStore = require('rate-limit-redis');
-    redisClient = redis.createClient({
-      url: process.env.REDIS_URL
-    });
-    redisClient.connect();
     store = new RedisStore({
-      client: redisClient,
+      client: redisClient.client,
       prefix: 'rate-limit:'
     });
-    console.log('Redis client initialized for rate limiting');
+    console.log('✓ Using shared Redis client for rate limiting');
+  } else if (!redisClient.enabled) {
+    console.log('ℹ Rate limiting: Redis is disabled, using memory store');
+  } else {
+    console.log('⚠ Rate limiting: Redis not connected yet, using memory store');
   }
 } catch (error) {
-  console.warn('Redis not available, using memory store for rate limiting');
+  console.warn('Redis not available for rate limiting, using memory store:', error.message);
 }
+
+// Register callback to initialize Redis store when it becomes ready
+// This ensures we use Redis as soon as it's available, without arbitrary delays
+redisClient.onReady(() => {
+  if (redisClient.enabled && redisClient.isConnected && !store) {
+    try {
+      RedisStore = require('rate-limit-redis');
+      store = new RedisStore({
+        client: redisClient.client,
+        prefix: 'rate-limit:'
+      });
+      console.log('✓ Rate limiting now using Redis (distributed rate limiting enabled)');
+    } catch (error) {
+      console.warn('Failed to initialize rate limiter with Redis:', error.message);
+    }
+  }
+});
 
 // Helper function to get client IP (handles IPv6 and IPv4)
 const getClientIp = (req) => {
