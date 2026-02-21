@@ -7,6 +7,10 @@ const ENFORCE_PROPERTY_OWNERSHIP = process.env.ENFORCE_PROPERTY_OWNERSHIP !== 'f
 const PROPERTY_ORG_CACHE_TTL = 86400; // 24 hours in seconds
 const PROPERTY_ORG_CACHE_PREFIX = 'property:org:';
 
+// Cache configuration for permissions checks
+const PERMISSION_CACHE_TTL = 600; // 10 minutes in seconds
+const PERMISSION_CACHE_PREFIX = 'permission:';
+
 class PermissionService {
   static normalizeLegacyRole(role) {
     if (!role) return null;
@@ -55,6 +59,17 @@ class PermissionService {
     return result.rows.length > 0;
   }
 
+  /**
+   * Generate a cache key for permission checks
+   */
+  static _getPermissionCacheKey(userId, resource, action, propertyId, organizationId) {
+    return `${PERMISSION_CACHE_PREFIX}${userId}:${resource}:${action}:${propertyId || 'null'}:${organizationId || 'null'}`;
+  }
+
+  /**
+   * Check if user has permission with caching
+   * Uses Redis cache with 10-minute TTL since permissions only change on login
+   */
   static async hasPermission(user, resource, action, scope = {}) {
     const userId = user?.id;
     if (!userId) return false;
@@ -65,6 +80,20 @@ class PermissionService {
     const hasPropertyScope = propertyId !== null && propertyId !== undefined && propertyId !== '';
     const hasOrgScope = organizationId !== null && organizationId !== undefined && organizationId !== '';
 
+    // Generate cache key
+    const cacheKey = this._getPermissionCacheKey(userId, resource, action, propertyId, organizationId);
+    
+    // Try to get from cache first
+    try {
+      const cached = await redisClient.get(cacheKey);
+      if (cached !== null && cached !== undefined) {
+        return cached === true || cached === 'true';
+      }
+    } catch (cacheError) {
+      console.warn('[PermissionService] Permission cache read failed, falling back to DB:', cacheError.message);
+    }
+
+    // Build query and execute
     const values = [userId, resource, action];
     let scopeClause = 'TRUE';
     if (hasPropertyScope || hasOrgScope) {
@@ -100,10 +129,26 @@ class PermissionService {
       values
     );
 
-    if (result.rows.length > 0) return true;
+    if (result.rows.length > 0) {
+      // Cache the positive result
+      try {
+        await redisClient.set(cacheKey, true, PERMISSION_CACHE_TTL);
+      } catch (cacheError) {
+        // Silently ignore cache write failures
+      }
+      return true;
+    }
 
     const legacyRoleName = this.normalizeLegacyRole(user.role);
-    if (!legacyRoleName) return false;
+    if (!legacyRoleName) {
+      // Cache the negative result for legacy role check
+      try {
+        await redisClient.set(cacheKey, false, PERMISSION_CACHE_TTL);
+      } catch (cacheError) {
+        // Silently ignore cache write failures
+      }
+      return false;
+    }
 
     const fallback = await Database.query(
       `
@@ -118,7 +163,17 @@ class PermissionService {
       `,
       [legacyRoleName, resource, action]
     );
-    return fallback.rows.length > 0;
+    
+    const hasPermission = fallback.rows.length > 0;
+    
+    // Cache the result
+    try {
+      await redisClient.set(cacheKey, hasPermission, PERMISSION_CACHE_TTL);
+    } catch (cacheError) {
+      // Silently ignore cache write failures
+    }
+    
+    return hasPermission;
   }
 
   static async ensureOrganizationAccess(user, organizationId) {
