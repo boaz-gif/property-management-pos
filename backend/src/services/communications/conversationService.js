@@ -374,8 +374,9 @@ class ConversationService {
 
     if (input.propertyId) {
       const propertyId = parseInt(input.propertyId, 10);
-      const orgRes = await Database.query('SELECT organization_id FROM properties WHERE id = $1 AND deleted_at IS NULL', [propertyId]);
-      return { propertyId, organizationId: orgRes.rows[0]?.organization_id || input.organizationId || null };
+      // Use cached lookup from PermissionService
+      const organizationId = await PermissionService.getOrganizationIdForProperty(propertyId);
+      return { propertyId, organizationId: organizationId ?? input.organizationId ?? null };
     }
 
     if (input.organizationId) {

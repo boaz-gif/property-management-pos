@@ -1,6 +1,11 @@
 const Database = require('../../utils/database');
+const redisClient = require('../../config/redis');
 
 const ENFORCE_PROPERTY_OWNERSHIP = process.env.ENFORCE_PROPERTY_OWNERSHIP !== 'false';
+
+// Cache configuration for property organization lookups
+const PROPERTY_ORG_CACHE_TTL = 86400; // 24 hours in seconds
+const PROPERTY_ORG_CACHE_PREFIX = 'property:org:';
 
 class PermissionService {
   static normalizeLegacyRole(role) {
@@ -160,8 +165,52 @@ class PermissionService {
 
   static async getOrganizationIdForProperty(propertyId) {
     if (propertyId === null || propertyId === undefined || propertyId === '') return null;
-    const result = await Database.query('SELECT organization_id FROM properties WHERE id = $1', [parseInt(propertyId)]);
-    return result.rows[0]?.organization_id ?? null;
+    
+    const parsedPropertyId = parseInt(propertyId);
+    if (!Number.isFinite(parsedPropertyId)) return null;
+    
+    const cacheKey = `${PROPERTY_ORG_CACHE_PREFIX}${parsedPropertyId}`;
+    
+    // Try to get from Redis cache first
+    try {
+      const cached = await redisClient.get(cacheKey);
+      if (cached !== null && cached !== undefined) {
+        return cached;
+      }
+    } catch (cacheError) {
+      console.warn('[PermissionService] Redis cache read failed, falling back to DB:', cacheError.message);
+    }
+    
+    // Query from database
+    const result = await Database.query('SELECT organization_id FROM properties WHERE id = $1', [parsedPropertyId]);
+    const organizationId = result.rows[0]?.organization_id ?? null;
+    
+    // Store in cache for future requests (24 hour TTL)
+    if (organizationId !== null) {
+      try {
+        await redisClient.set(cacheKey, organizationId, PROPERTY_ORG_CACHE_TTL);
+      } catch (cacheError) {
+        console.warn('[PermissionService] Redis cache write failed:', cacheError.message);
+      }
+    }
+    
+    return organizationId;
+  }
+  
+  /**
+   * Invalidate the cached organization_id for a property.
+   * Call this when a property's organization is changed.
+   */
+  static async invalidatePropertyOrgCache(propertyId) {
+    const parsedPropertyId = parseInt(propertyId);
+    if (!Number.isFinite(parsedPropertyId)) return;
+    
+    const cacheKey = `${PROPERTY_ORG_CACHE_PREFIX}${parsedPropertyId}`;
+    try {
+      await redisClient.del(cacheKey);
+    } catch (cacheError) {
+      console.warn('[PermissionService] Redis cache invalidation failed:', cacheError.message);
+    }
   }
 
   static async ensurePropertyAccess(user, propertyId) {
